@@ -3,6 +3,7 @@ from asyncpg.pool import create_pool, Pool
 from asyncpg.connection import Connection
 from asyncpg import exceptions
 from loguru._logger import Logger
+from loguru import logger as loguru_logger
 
 from .schema import Schema
 from .records import Records
@@ -10,10 +11,11 @@ from .base import BaseStorage
 
 
 class PostgresqlStorage(BaseStorage):
-    def __init__(self, logger: Logger, database: str,
+    def __init__(self, database: str,
                  host: str = 'localhost', port: str | int = 5432,
-                 user: str = 'postgres', password: str = None):
-        super().__init__(logger, database, host, port, user, password)
+                 user: str = 'postgres', password: str | None = None,
+                 logger: Logger = loguru_logger):
+        super().__init__(database, host, port, user, password, logger)
 
         self.__pool: Pool | None = None
         self.__connection: Connection | None = None
@@ -22,7 +24,7 @@ class PostgresqlStorage(BaseStorage):
         try:
             self.__pool = await create_pool(database=self.database, host=self.host, port=self.port, user=self.user, password=self.password)
         except OSError:
-            self.logger.error('Connection failed')
+            self.logger.error('Pool creation failed')
         return self.__pool is not None
 
     async def close_pool(self) -> bool:
@@ -47,27 +49,29 @@ class PostgresqlStorage(BaseStorage):
         except exceptions.InterfaceError:
             self.logger.error('Attempting to release not acquired connection')
 
+    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
+        async with self as connection:
+            return await connection.execute(query, *args)
+
     async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: type = None) -> Records:
         async with self as connection:
             records = await connection.fetch(query, *args)
         return Records(records, schema_t)
 
-    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
-        async with self as connection:
-            return await connection.execute(query, *args)
-
     async def insert(self, schema: Schema, schema_t: type = None) -> Schema | dict[str, Any] | None:
-        placeholders = ', '.join([f'${index + 1}' for index in range(len(schema.dict().keys()))])
-        columns, values = str(tuple(schema.dict().keys())).replace("'", '"'), schema.dict().values()
+        data = dict(schema.pretty())
+        placeholders = ', '.join([f'${index + 1}' for index in range(len(data.keys()))])
+        columns, values = str(tuple(data.keys())).replace("'", '"'), data.values()
         query, args = f'INSERT INTO "{schema.name()}" {columns} VALUES ({placeholders}) RETURNING *;', values
         async with self as connection:
             records = await connection.fetch(query, *args)
         return Records(records, schema_t).first()
 
     async def update(self, schema: Schema, where: dict[str, Any], schema_t: type = None) -> Schema | dict[str, Any] | None:
-        values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(schema.dict().keys())])
+        data = dict(schema.pretty())
+        values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(data.keys())])
         conditions = ' and '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
-        query, args = f'UPDATE "{schema.name()}" SET {values} WHERE {conditions} RETURNING *;', tuple(schema.dict().values())
+        query, args = f'UPDATE "{schema.name()}" SET {values} WHERE {conditions} RETURNING *;', tuple(data.values())
         async with self as connection:
             records = await connection.fetch(query, *args)
         return Records(records, schema_t).first()

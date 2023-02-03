@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import Any
 from asyncpg import Record
 
@@ -18,14 +19,18 @@ class Records:
         except IndexError:
             return None
 
-    def limit(self, value: int) -> list[Record] | list[dict[str, Any]]:
+    def last(self) -> Record | dict[str, Any] | None:
         try:
-            return self.__records[:value]
+            return self.__records[-1]
         except IndexError:
-            return self.all()
+            return None
 
-    def offset(self, value: int) -> list[Record] | list[dict[str, Any]]:
-        try:
-            return self.__records[value:]
-        except IndexError:
-            return self.all()
+    def limit(self, value: int) -> 'Records':
+        with suppress(IndexError):
+            self.__records = self.__records[:value]
+        return self
+
+    def offset(self, value: int) -> 'Records':
+        with suppress(IndexError):
+            self.__records = self.__records[value:]
+        return self

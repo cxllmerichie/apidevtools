@@ -7,14 +7,14 @@ from .records import Records
 
 
 class BaseStorage(ABC):
-    def __init__(self, logger: Logger, database: str, host: str, port: str | int, user: str, password: str | None):
-        self.logger: Logger = logger
-
+    def __init__(self, database: str, host: str, port: str | int, user: str, password: str | None, logger: Logger):
         self.database: str = database
         self.host: str = host
-        self.port: int = port
+        self.port: str | int = port
         self.user: str = user
-        self.password: str = password
+        self.password: str | None = password
+
+        self.logger: Logger = logger
 
     @abstractmethod
     async def create_pool(self) -> bool:
@@ -25,11 +25,11 @@ class BaseStorage(ABC):
         ...
 
     @abstractmethod
-    async def select(self, query: str, args: tuple[Any, ...] = (), schema_type: type[Schema] = None) -> Records:
+    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
         ...
 
     @abstractmethod
-    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
+    async def select(self, query: str, args: tuple[Any, ...] = (), schema_type: type[Schema] = None) -> Records:
         ...
 
     @abstractmethod
