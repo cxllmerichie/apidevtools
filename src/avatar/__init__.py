@@ -1,1 +1,1 @@
-from .avatar import default_avatar, crop_image, default_avatar_url
+from .avatar import avatar, crop, default_avatar_url
