@@ -1,5 +1,7 @@
 from telegraph.aio import Telegraph
 from io import BytesIO
+from requests import get
+from requests.exceptions import MissingSchema
 
 
 TELEGRAPH = Telegraph()
@@ -13,3 +15,10 @@ async def upload(files: BytesIO | str | list[BytesIO | str]) -> None | str | lis
     if len(urls) > 1:
         return urls
     return None
+
+
+def download(url: str) -> bytes | None:
+    try:
+        return BytesIO(get(url).content).read()
+    except MissingSchema:
+        return None
