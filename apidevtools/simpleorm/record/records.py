@@ -2,7 +2,7 @@ from contextlib import suppress
 from typing import Any
 from asyncpg import Record
 
-from .schema import Schema
+from apidevtools.simpleorm.schema import Schema
 
 
 class Records:

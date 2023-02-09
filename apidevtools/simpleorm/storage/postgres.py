@@ -3,19 +3,19 @@ from asyncpg.pool import create_pool, Pool
 from asyncpg.connection import Connection
 from asyncpg import exceptions
 from loguru._logger import Logger
-from loguru import logger as loguru_logger
+import loguru
 
-from .schema import Schema
-from .records import Records
+from apidevtools.simpleorm.schema import Schema
+from apidevtools.simpleorm.record.records import Records
 from .base import BaseStorage
-from .relation import Relation
+from apidevtools.simpleorm.relation import Relation
 
 
 class PostgresqlStorage(BaseStorage):
     def __init__(self, database: str,
                  host: str = 'localhost', port: str | int = 5432,
                  user: str = 'postgres', password: str | None = None,
-                 logger: Logger = loguru_logger):
+                 logger: Logger = loguru.logger):
         super().__init__(database, host, port, user, password, logger)
 
         self.__pool: Pool | None = None
@@ -60,10 +60,10 @@ class PostgresqlStorage(BaseStorage):
         records = Records(records, schema_t)
         if relations:
             for relation in relations:
-                for record in records.all():
+                for index, record in enumerate(records.all()):
                     columns = ', '.join([f'"{column}"' for column in relation.columns])
                     conditions = ' and '.join([f'"{key}" = ${index}' for index, key in enumerate(list(relation.where.items()))])
-                    query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(relation.where.items())
+                    query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(relation.where.values())
                     instances = (await self.select(query, args, relation.rel_schema_t)).all()
                     if isinstance(record, dict):
                         record[relation.fieldname] = instances
@@ -71,14 +71,14 @@ class PostgresqlStorage(BaseStorage):
                         record = relation.ext_schema_t(**dict(record))
                         setattr(record, relation.fieldname, instances)
                     elif isinstance(record, relation.ext_schema_t):
-                        record = relation.ext_schema_t(**dict(record))
+                        records.__records[index] = relation.ext_schema_t(**dict(record))
         return records
 
     async def insert(self, schema: Schema, schema_t: type = None) -> Schema | dict[str, Any] | None:
         data = dict(schema.pretty())
-        placeholders = ', '.join([f'${index + 1}' for index in range(len(data.keys()))])
+        psql_placeholders = ', '.join([f'${index + 1}' for index in range(len(data.keys()))])
         columns, values = str(tuple(data.keys())).replace("'", '"'), data.values()
-        query, args = f'INSERT INTO "{schema.tablename}" {columns} VALUES ({placeholders}) RETURNING *;', values
+        query, args = f'INSERT INTO "{schema.tablename}" {columns} VALUES ({psql_placeholders}) RETURNING *;', values
         async with self as connection:
             records = await connection.fetch(query, *args)
         return Records(records, schema_t).first()
