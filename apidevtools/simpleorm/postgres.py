@@ -8,6 +8,7 @@ from loguru import logger as loguru_logger
 from .schema import Schema
 from .records import Records
 from .base import BaseStorage
+from .relation import Relation
 
 
 class PostgresqlStorage(BaseStorage):
@@ -53,16 +54,31 @@ class PostgresqlStorage(BaseStorage):
         async with self as connection:
             return await connection.execute(query, *args)
 
-    async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: type = None) -> Records:
+    async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: type = None, relations: list[Relation] = None) -> Records:
         async with self as connection:
             records = await connection.fetch(query, *args)
-        return Records(records, schema_t)
+        records = Records(records, schema_t)
+        if relations:
+            for relation in relations:
+                for record in records.all():
+                    columns = ', '.join([f'"{column}"' for column in relation.columns])
+                    conditions = ' and '.join([f'"{key}" = ${index}' for index, key in enumerate(list(relation.where.items()))])
+                    query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(relation.where.items())
+                    instances = (await self.select(query, args, relation.rel_schema_t)).all()
+                    if isinstance(record, dict):
+                        record[relation.fieldname] = instances
+                    elif isinstance(record, schema_t):
+                        record = relation.ext_schema_t(**dict(record))
+                        setattr(record, relation.fieldname, instances)
+                    elif isinstance(record, relation.ext_schema_t):
+                        record = relation.ext_schema_t(**dict(record))
+        return records
 
     async def insert(self, schema: Schema, schema_t: type = None) -> Schema | dict[str, Any] | None:
         data = dict(schema.pretty())
         placeholders = ', '.join([f'${index + 1}' for index in range(len(data.keys()))])
         columns, values = str(tuple(data.keys())).replace("'", '"'), data.values()
-        query, args = f'INSERT INTO "{schema.name()}" {columns} VALUES ({placeholders}) RETURNING *;', values
+        query, args = f'INSERT INTO "{schema.tablename}" {columns} VALUES ({placeholders}) RETURNING *;', values
         async with self as connection:
             records = await connection.fetch(query, *args)
         return Records(records, schema_t).first()
@@ -71,7 +87,7 @@ class PostgresqlStorage(BaseStorage):
         data = dict(schema.pretty())
         values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(data.keys())])
         conditions = ' and '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
-        query, args = f'UPDATE "{schema.name()}" SET {values} WHERE {conditions} RETURNING *;', tuple(data.values())
+        query, args = f'UPDATE "{schema.tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(data.values())
         async with self as connection:
             records = await connection.fetch(query, *args)
         return Records(records, schema_t).first()
