@@ -1,55 +1,57 @@
-from PIL import ImageDraw, Image, ImageFont
+import PIL.Image
+import io
+from PIL import ImageDraw, ImageFont
 from numpy import array, dstack
-from io import BytesIO
-from dataclasses import dataclass
 from abc import ABC
 
-from ..telegraph import upload
-
-
-@dataclass
-class AvatarPicture:
-    image: Image
-    default_text = 'N/S'
-
-    def bytes(self) -> bytes:
-        return self.bytesio().getvalue()
-
-    def bytesio(self) -> BytesIO:
-        output = BytesIO()
-        self.image.save(output, 'PNG')
-        return output
-
-    async def url(self) -> str:
-        return await upload(self.bytesio())
+from .image import Image, convert
 
 
 class Avatar(ABC):
     @staticmethod
-    def picture(
-            data: dict | str = AvatarPicture.default_text, size: int = 512, fonttf='fonts/ARIALNB.TTF',
+    def image(
+            text: str = Image.default_text, size: int = 512, fonttf='fonts/ARIALNB.TTF',
             bg_color: tuple[int, int, int] = (0, 0, 0), font_color: tuple[int, int, int] = (255, 255, 255)
-    ) -> AvatarPicture:
-        text = ''.join([str(value)[0] for value in data.values()]).upper() if isinstance(data, dict) else data
+    ) -> Image:
+        """
+        Generate image from apidevtools.avatar.image.Image. Supposed to be used as for instance: user avatar.
+        By default has "N/A" white text on the black background.
+        :param text:
+        :param size:
+        :param fonttf:
+        :param bg_color:
+        :param font_color:
+        :return:
+        """
         font = ImageFont.truetype(font=fonttf, size=int(size * 0.6))
-        image = Image.new(mode='RGB', size=(size, size), color=bg_color)
+        image = PIL.Image.new(mode='RGB', size=(size, size), color=bg_color)
         draw = ImageDraw.Draw(image)
         _, _, width, height = draw.textbbox((0, 0), text, font=font)
         draw.text(xy=((size - width) / 2, (size - height) / 3), text=text, font=font, fill=font_color)
-        return AvatarPicture(image)
+        return Image(image)
 
     @staticmethod
-    def crop(img_bytes: BytesIO) -> AvatarPicture:
-        image = Image.open(img_bytes)
+    def crop(image: bytes | io.BytesIO | PIL.Image.Image | 'apidevtools.avatar.image.Image') -> Image:
+        """
+        Crop any image to circle form.
+        :param image:
+        :return:
+        """
+        image = convert(image)
         size = min(image.size)
-        alpha = Image.new('L', image.size, 0)
+        alpha = PIL.Image.new('L', image.size, 0)
         ImageDraw.Draw(alpha).pieslice([0, 0, size, size], 0, 360, fill=255)
-        image = Image.fromarray(dstack((array(image), array(alpha))))
+        image = PIL.Image.fromarray(dstack((array(image), array(alpha))))
         image = image.crop((0, 0, size, size))
-        return AvatarPicture(image)
+        return Image(image)
 
     @staticmethod
-    def default(data: dict | str = AvatarPicture.default_text) -> AvatarPicture:
-        avatar = Avatar.picture(data)
-        avatar = Avatar.crop(avatar.bytesio())
-        return avatar
+    def default(text: str = Image.default_text) -> Image:
+        """
+        Quick way to create an avatar from some text.
+        :param text:
+        :return:
+        """
+        image = Avatar.image(text)
+        image = Avatar.crop(image)
+        return image
