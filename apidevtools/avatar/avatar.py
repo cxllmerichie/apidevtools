@@ -31,7 +31,7 @@ class Avatar(ABC):
         return Image(image)
 
     @staticmethod
-    def crop(image: bytes | io.BytesIO | PIL.Image.Image | 'apidevtools.avatar.image.Image') -> Image:
+    def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
         """
         Crop any image to circle form.
         :param image:

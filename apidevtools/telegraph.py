@@ -2,7 +2,7 @@ from telegraph.aio import Telegraph as pypi_telegraph_Telegraph
 import io
 from aiohttp import ClientSession
 
-from .avatar import Image
+# from .avatar.image import Image
 
 
 class Telegraph:
@@ -23,15 +23,15 @@ class Telegraph:
             return urls
         return None
 
-    @staticmethod
-    def download(url: str) -> Image | None:
-        """
-        Download picture by url from any source
-        :param url:
-        :return:
-        """
-        async with ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    return Image(await response.read())
-        return None
+    # @staticmethod
+    # async def download(url: str) -> Image | None:
+    #     """
+    #     Download picture by url from any source
+    #     :param url:
+    #     :return:
+    #     """
+    #     async with ClientSession() as session:
+    #         async with session.get(url) as response:
+    #             if response.status == 200:
+    #                 return Image(await response.read())
+    #     return None
