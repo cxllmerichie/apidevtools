@@ -25,10 +25,7 @@ app.add_middleware(
 
 app.include_router(routers.auth_router)
 app.include_router(routers.user_router)
-app.include_router(routers.password_router)
-app.include_router(routers.category_router)
 app.include_router(routers.item_router)
-app.include_router(routers.field_router)
 
 
 @app.on_event('startup')

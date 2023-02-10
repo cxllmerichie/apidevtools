@@ -1,4 +1,6 @@
-from apidevtools.simpleorm import Schema
+from apidevtools import Schema
+
+from .item import Item
 
 
 class UserBase(Schema):
@@ -22,3 +24,8 @@ class UserUpdate(UserBase):
 
 class User(UserBase):
     id: int
+
+    items: list[Item] = []
+
+    def relations(self) -> list[Relation]:
+        return [Relation('item', dict(user_id=self.id), User, 'items', ['*'], Item)]

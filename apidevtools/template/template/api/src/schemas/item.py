@@ -1,4 +1,4 @@
-from apidevtools import Schema
+from apidevtools import Schema, Relation
 
 
 class ItemBase(Schema):
@@ -17,8 +17,9 @@ class ItemCreate(ItemBase):
 
 
 class ItemCreateCrud(ItemBase):
-    category_id: int
+    user_id: int
 
 
 class Item(ItemCreateCrud):
     id: int
+    

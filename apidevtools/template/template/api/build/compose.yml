@@ -1,12 +1,12 @@
 version: '3.3'
 services:
   postgres:
-    container_name: 'password_manager'
+    container_name: ''
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_DB: 'password_manager'
+      POSTGRES_DB: ''
       POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: '3doTd73Rdj5B2DlA4N'
+      POSTGRES_PASSWORD: ''
     image: postgres
     restart: always

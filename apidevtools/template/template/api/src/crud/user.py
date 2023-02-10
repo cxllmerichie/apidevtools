@@ -2,7 +2,7 @@ from apidevtools import Hasher, Avatar
 
 from .. import schemas
 from ..const import db
-from .category import get_categories, delete_category
+from .item import get_items, delete_item
 
 
 async def create_user(user: schemas.UserCreate) -> schemas.User:
@@ -28,8 +28,8 @@ async def update_user(user_id: int, user: schemas.UserUpdate) -> schemas.User:
 
 
 async def delete_user(user_id: int) -> None:
-    db_categories = await get_categories(user_id=user_id)
-    for db_category in db_categories:
-        await delete_category(category_id=db_category.id)
+    db_items = await get_items(user_id=user_id)
+    for db_item in db_items:
+        await delete_item(item_id=db_item.id)
     query, args = f'DELETE FROM "user" WHERE "id" = $1;', (user_id, )
     await db.execute(query, args)
