@@ -54,17 +54,19 @@ class PostgresqlStorage(BaseStorage):
         async with self as connection:
             return await connection.execute(query, *args)
 
-    async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: type = None, relations: list[Relation] = None) -> Records:
+    async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: type = None, relations: bool = False) -> Records:
         async with self as connection:
             records = await connection.fetch(query, *args)
         records = Records(records, schema_t)
         if relations:
-            for relation in relations:
-                for index, record in enumerate(records.all()):
+            for index, record in enumerate(records.all()):
+                for relation in record.relations():
                     columns = ', '.join([f'"{column}"' if column != '*' else '*' for column in relation.columns])
-                    conditions = ' and '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(list(relation.where.keys()))])
-                    query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(relation.where.values())
-                    instances = (await self.select(query, args, relation.rel_schema_t)).all()
+                    conditions = ' and '.join(
+                        [f'"{key}" = ${index + 1}' for index, key in enumerate(list(relation.where.keys()))])
+                    query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(
+                        relation.where.values())
+                    instances = (await self.select(query, args, relation.rel_schema_t, True)).all()
                     if isinstance(record, dict):
                         record[relation.fieldname] = instances
                     elif isinstance(record, schema_t):

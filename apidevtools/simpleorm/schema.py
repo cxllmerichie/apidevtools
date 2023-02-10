@@ -3,6 +3,8 @@ from datetime import datetime, date, time
 from abc import ABC, abstractmethod
 from typing import Any
 
+from .relation import Relation
+
 
 class Schema(BaseModel, ABC):
     def serializable(self, types: tuple[type, ...] = (datetime, date, time)) -> dict[str: Any]:
@@ -23,12 +25,15 @@ class Schema(BaseModel, ABC):
         ...
 
     @property
-    def tablename(self):
+    def tablename(self) -> str:
         """
         method, which will be used in the simpleorm.storage methods
         :return:
         """
         return self.__tablename__
+
+    def relations(self) -> list[Relation]:
+        return []
 
     def pretty(self) -> 'Schema':
         """
