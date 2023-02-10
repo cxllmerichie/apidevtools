@@ -61,8 +61,8 @@ class PostgresqlStorage(BaseStorage):
         if relations:
             for relation in relations:
                 for index, record in enumerate(records.all()):
-                    columns = ', '.join([f'"{column}"' for column in relation.columns])
-                    conditions = ' and '.join([f'"{key}" = ${index}' for index, key in enumerate(list(relation.where.items()))])
+                    columns = ', '.join([f'"{column}"' if column != '*' else '*' for column in relation.columns])
+                    conditions = ' and '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(list(relation.where.keys()))])
                     query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(relation.where.values())
                     instances = (await self.select(query, args, relation.rel_schema_t)).all()
                     if isinstance(record, dict):
@@ -70,8 +70,7 @@ class PostgresqlStorage(BaseStorage):
                     elif isinstance(record, schema_t):
                         record = relation.ext_schema_t(**dict(record))
                         setattr(record, relation.fieldname, instances)
-                    elif isinstance(record, relation.ext_schema_t):
-                        records.__records[index] = relation.ext_schema_t(**dict(record))
+                    records.records[index] = relation.ext_schema_t(**dict(record))
         return records
 
     async def insert(self, schema: Schema, schema_t: type = None) -> Schema | dict[str, Any] | None:
