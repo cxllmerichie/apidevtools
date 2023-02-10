@@ -15,12 +15,20 @@ class Schema(BaseModel, ABC):
 
     @property
     @abstractmethod
-    def tablename(self) -> str:
+    def __tablename__(self) -> str:
         """
         Abstract property, supposed to handle name of the database table to be used together with simpleorm.storage
         :return:
         """
         ...
+
+    @property
+    def tablename(self):
+        """
+        method, which will be used in the simpleorm.storage methods
+        :return:
+        """
+        return self.__tablename__
 
     def pretty(self) -> 'Schema':
         """
