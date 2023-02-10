@@ -1,3 +1,0 @@
-asyncpg
-pydantic
-loguru

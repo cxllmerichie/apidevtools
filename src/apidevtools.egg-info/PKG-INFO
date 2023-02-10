@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
-Name: APIDevTools
-Version: 1.0.0
-Summary: All in one tools for API creation.
+Name: apidevtools
+Version: 1.0.2
+Summary: All in one tools for API development.
 Author-email: cxllmerichie <cxllmerichie@gmail.com>
 License: MIT License
         
@@ -24,8 +24,8 @@ License: MIT License
         LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
         OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
         SOFTWARE.
-Project-URL: Homepage, https://github.com/cxllmerichie/APIDevTools
-Project-URL: Bug Tracker, https://github.com/cxllmerichie/APIDevTools/issues
+Project-URL: Homepage, https://github.com/cxllmerichie/apidevtools
+Project-URL: Bug Tracker, https://github.com/cxllmerichie/apidevtools/issues
 Classifier: Programming Language :: Python :: 3
 Classifier: Framework :: FastAPI
 Classifier: Topic :: Software Development

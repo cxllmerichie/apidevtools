@@ -1,0 +1,4 @@
+cchardet
+ujson
+aiodns
+uvloop
