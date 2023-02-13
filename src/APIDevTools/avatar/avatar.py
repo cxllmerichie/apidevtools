@@ -6,7 +6,7 @@ import numpy as _np
 from .image import Image, convert
 
 
-def image(
+def generate(
         text: str = Image.default_text, size: int = 512, fonttf='fonts/ARIALNB.TTF',
         bg_color: tuple[int, int, int] = (0, 0, 0), font_color: tuple[int, int, int] = (255, 255, 255)
 ) -> Image:
@@ -49,6 +49,6 @@ def default(text: str = Image.default_text) -> Image:
     :param text:
     :return:
     """
-    img = image(text)
+    img = generate(text)
     img = crop(img)
     return img

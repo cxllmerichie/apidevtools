@@ -57,7 +57,7 @@ class PostgresqlStorage(BaseStorage):
         async with self as connection:
             records = await connection.fetch(query, *args)
         records = Records(records, schema_t)
-        if not depth:
+        if depth > 0:
             for index, record in enumerate(records.all()):
                 for relation in record.relations():
                     columns = ', '.join([f'"{column}"' if column != '*' else '*' for column in relation.columns])
