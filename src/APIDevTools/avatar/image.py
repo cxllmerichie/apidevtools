@@ -1,8 +1,6 @@
 import io
 import PIL.Image
 
-from ..telegraph import upload
-
 
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
     """
@@ -41,4 +39,6 @@ class Image:
         return output
 
     async def url(self) -> str:
+        from ..telegraph import upload
+
         return await upload(self.bytesio())

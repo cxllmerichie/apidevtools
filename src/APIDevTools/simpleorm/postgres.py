@@ -1,14 +1,13 @@
 from typing import Any
-from asyncpg.pool import create_pool, Pool
-from asyncpg.connection import Connection
-from asyncpg import exceptions
+from asyncpg.pool import create_pool as _create_pool, Pool as _Pool
+from asyncpg.connection import Connection as _Connection
+from asyncpg import exceptions as _exceptions
 from loguru._logger import Logger
 import loguru
 
 from .schema import Schema
 from .records import Records
 from .base import BaseStorage
-from .relation import Relation
 
 
 class PostgresqlStorage(BaseStorage):
@@ -18,12 +17,12 @@ class PostgresqlStorage(BaseStorage):
                  logger: Logger = loguru.logger):
         super().__init__(database, host, port, user, password, logger)
 
-        self.__pool: Pool | None = None
-        self.__connection: Connection | None = None
+        self.__pool: _Pool | None = None
+        self.__connection: _Connection | None = None
 
     async def create_pool(self) -> bool:
         try:
-            self.__pool = await create_pool(database=self.database, host=self.host, port=self.port, user=self.user, password=self.password)
+            self.__pool = await _create_pool(database=self.database, host=self.host, port=self.port, user=self.user, password=self.password)
         except OSError:
             self.logger.error('Pool creation failed')
         return self.__pool is not None
@@ -47,7 +46,7 @@ class PostgresqlStorage(BaseStorage):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         try:
             await self.__pool.release(self.__connection)
-        except exceptions.InterfaceError:
+        except _exceptions.InterfaceError:
             self.logger.error('Attempting to release not acquired connection')
 
     async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:

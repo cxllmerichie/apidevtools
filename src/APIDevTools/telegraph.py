@@ -1,11 +1,11 @@
-from telegraph.aio import Telegraph
-from aiohttp import ClientSession
+from telegraph.aio import Telegraph as _Telegraph
+from aiohttp import ClientSession as _ClientSession
 import io
 
 from .avatar.image import Image
 
 
-telegraph: Telegraph = Telegraph()
+__telegraph: _Telegraph = _Telegraph()
 
 
 async def upload(files: io.BytesIO | str | list[io.BytesIO | str]) -> None | str | list[str]:
@@ -14,7 +14,7 @@ async def upload(files: io.BytesIO | str | list[io.BytesIO | str]) -> None | str
     :param files:
     :return:
     """
-    sources: list = await telegraph.upload_file(f=files)
+    sources: list = await __telegraph.upload_file(f=files)
     urls = [f"https://telegra.ph{source.get('src')}" for source in sources]
     if len(urls) == 1:
         return urls[0]
@@ -29,7 +29,7 @@ async def download(url: str) -> Image | None:
     :param url:
     :return:
     """
-    async with ClientSession() as session:
+    async with _ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 return Image(await response.read())

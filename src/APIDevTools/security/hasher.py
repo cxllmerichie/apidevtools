@@ -1,10 +1,10 @@
-from contextlib import suppress
-from argon2 import PasswordHasher
+from contextlib import suppress as _suppress
+from argon2 import PasswordHasher as _PasswordHasher
 from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHash
 
 
 error: Exception = VerifyMismatchError
-hasher: PasswordHasher = PasswordHasher()
+__hasher: _PasswordHasher = _PasswordHasher()
 
 
 def hash(password: str) -> str:
@@ -14,7 +14,7 @@ def hash(password: str) -> str:
     :param password: plain password string
     :return: hashed password string
     """
-    return hasher.hash(password=password)
+    return __hasher.hash(password=password)
 
 
 def cmp(pw_hash: str, password: str) -> bool:
@@ -25,5 +25,5 @@ def cmp(pw_hash: str, password: str) -> bool:
     :param password: plain password string
     :return: True if password matches, False otherwise
     """
-    with suppress(VerifyMismatchError, VerificationError, InvalidHash):
-        return hasher.verify(hash=pw_hash, password=password) is True
+    with _suppress(VerifyMismatchError, VerificationError, InvalidHash):
+        return __hasher.verify(hash=pw_hash, password=password) is True

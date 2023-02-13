@@ -1,13 +1,13 @@
-from pydantic import BaseModel
-from datetime import datetime, date, time
-from abc import ABC, abstractmethod
+from pydantic import BaseModel as _BaseModel
+import datetime
+from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from typing import Any
 
 from .relation import Relation
 
 
-class Schema(BaseModel, ABC):
-    def serializable(self, types: tuple[type, ...] = (datetime, date, time)) -> dict[str: Any]:
+class Schema(_BaseModel, _ABC):
+    def serializable(self, types: tuple[type, ...] = (datetime.datetime, datetime.date, datetime.time)) -> dict[str: Any]:
         """
         Returns python dictionary of values which will not trigger FastAPI error related to not serializable objects
         :param types:
@@ -16,7 +16,7 @@ class Schema(BaseModel, ABC):
         return {key: str(value) if isinstance(value, types) else value for key, value in dict(self).items()}
 
     @property
-    @abstractmethod
+    @_abstractmethod
     def __tablename__(self) -> str:
         """
         Abstract property, supposed to handle name of the database table to be used together with simpleorm.storage

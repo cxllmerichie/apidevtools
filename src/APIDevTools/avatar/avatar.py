@@ -1,7 +1,7 @@
 import PIL.Image
 import io
-from PIL import ImageDraw, ImageFont
-from numpy import array, dstack
+from PIL import ImageDraw as _ImageDraw, ImageFont as _ImageFont
+import numpy as _np
 
 from .image import Image, convert
 
@@ -20,9 +20,9 @@ def image(
     :param font_color:
     :return:
     """
-    font = ImageFont.truetype(font=fonttf, size=int(size * 0.6))
+    font = _ImageFont.truetype(font=fonttf, size=int(size * 0.6))
     img = PIL.Image.new(mode='RGB', size=(size, size), color=bg_color)
-    draw = ImageDraw.Draw(img)
+    draw = _ImageDraw.Draw(img)
     _, _, width, height = draw.textbbox((0, 0), text, font=font)
     draw.text(xy=((size - width) / 2, (size - height) / 3), text=text, font=font, fill=font_color)
     return Image(img)
@@ -37,8 +37,8 @@ def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
     img = convert(image)
     size = min(img.size)
     alpha = PIL.Image.new('L', img.size, 0)
-    ImageDraw.Draw(alpha).pieslice([0, 0, size, size], 0, 360, fill=255)
-    img = PIL.Image.fromarray(dstack((array(img), array(alpha))))
+    _ImageDraw.Draw(alpha).pieslice([0, 0, size, size], 0, 360, fill=255)
+    img = PIL.Image.fromarray(_np.dstack((_np.array(img), _np.array(alpha))))
     img = img.crop((0, 0, size, size))
     return Image(img)
 

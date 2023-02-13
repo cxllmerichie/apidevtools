@@ -1,4 +1,4 @@
-from contextlib import suppress
+from contextlib import suppress as _suppress
 from typing import Any
 from asyncpg import Record
 
@@ -26,17 +26,17 @@ class Records:
             return None
 
     def limit(self, value: int) -> 'Records':
-        with suppress(IndexError):
+        with _suppress(IndexError):
             self.records = self.records[:value]
         return self
 
     def offset(self, value: int) -> 'Records':
-        with suppress(IndexError):
+        with _suppress(IndexError):
             self.records = self.records[value:]
         return self
 
     def order_by(self, column: str, direction: str = 'ASC') -> 'Records':
-        with suppress(AttributeError):
+        with _suppress(AttributeError):
             self.records = sorted(self.records, key=lambda d: d[column])
         self.records = reversed(self.records) if direction == 'DESC' else self.records
         return self

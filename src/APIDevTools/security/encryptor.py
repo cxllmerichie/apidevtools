@@ -1,13 +1,13 @@
-from Crypto.Cipher import AES
-from Crypto import Random
-from Crypto.Cipher._mode_cfb import CfbMode
+from Crypto.Cipher import AES as _AES
+from Crypto import Random as _Random
+from Crypto.Cipher._mode_cfb import CfbMode as _CfbMode
 
 
-__iv = Random.new().read(AES.block_size)
+__iv = _Random.new().read(_AES.block_size)
 
 
-def __cipher(key: bytes) -> CfbMode:
-    return AES.new(key, AES.MODE_CFB, __iv)
+def __cipher(key: bytes) -> _CfbMode:
+    return _AES.new(key, _AES.MODE_CFB, __iv)
 
 
 def encrypt(data: str, key: bytes) -> str:
@@ -23,4 +23,6 @@ def decrypt(encrypted: str, key: bytes) -> str:
 
 
 def key(str_key: str) -> bytes:
+    if len(str_key) != 16:
+        raise AssertionError('Encryption key length must be 16 characters.')
     return str_key.encode()
