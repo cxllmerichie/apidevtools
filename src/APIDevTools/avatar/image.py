@@ -1,8 +1,7 @@
 import io
 import PIL.Image
-from dataclasses import dataclass
 
-from ..telegraph import Telegraph
+from ..telegraph import upload
 
 
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
@@ -21,7 +20,6 @@ def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
     return image
 
 
-@dataclass
 class Image:
     __image: PIL.Image.Image
     default_text = 'N/S'
@@ -43,4 +41,4 @@ class Image:
         return output
 
     async def url(self) -> str:
-        return await Telegraph.upload(self.bytesio())
+        return await upload(self.bytesio())

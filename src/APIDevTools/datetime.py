@@ -6,5 +6,5 @@ def utcnow() -> datetime:
     return datetime.utcnow()
 
 
-def str_to_dt(dt: str) -> datetime:
-    return parse(dt)
+def str_to_dt(str_dt: str) -> datetime:
+    return parse(str_dt)

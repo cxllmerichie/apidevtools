@@ -1,4 +1,4 @@
-LICENSE
+LICENSE.txt
 README.md
 pyproject.toml
 src/apidevtools/__init__.py
@@ -8,14 +8,13 @@ src/apidevtools/utils.py
 src/apidevtools.egg-info/PKG-INFO
 src/apidevtools.egg-info/SOURCES.txt
 src/apidevtools.egg-info/dependency_links.txt
-src/apidevtools.egg-info/requires.txt
 src/apidevtools.egg-info/top_level.txt
 src/apidevtools/avatar/__init__.py
 src/apidevtools/avatar/avatar.py
 src/apidevtools/avatar/image.py
 src/apidevtools/security/__init__.py
-src/apidevtools/security/encryption.py
-src/apidevtools/security/hashing.py
+src/apidevtools/security/encryptor.py
+src/apidevtools/security/hasher.py
 src/apidevtools/simpleorm/__init__.py
 src/apidevtools/simpleorm/base.py
 src/apidevtools/simpleorm/postgres.py

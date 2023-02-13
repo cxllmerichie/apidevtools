@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apidevtools"
-version = "1.0.2"
+version = "1.0.4"
 authors = [
     { name="cxllmerichie", email="cxllmerichie@gmail.com" },
 ]
@@ -20,19 +20,28 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License"
 ]
-dependencies = [
-    "aiodns~=3.0.0",
-    "aiohttp~=3.8.3",
-    "cchardet~=2.1.7",
-    "python-dateutil~=2.8.2",
-    "argon2-cffi~=21.3.0",
+dependencies=[
+#    simpleorm
     "asyncpg~=0.27.0",
+    "pydantic~=1.10.4",
+    "loguru~=0.6.0",
+#   avatar
+    "Pillow~=9.4.0",
+    "numpy~=1.24.2",
+#   security
+    "argon2-cffi~=21.3.0",
+    "pycryptodome~=3.17",
+#   telegraph
     "telegraph~=2.2.0",
     "httpx~=0.23.3",
-    "loguru~=0.6.0",
-    "numpy~=1.24.1",
-    "Pillow~=9.4.0",
-    "pydantic~=1.10.4"
+    "aiohttp~=3.8.3",
+#   datetime
+    "python-dateutil~=2.8.2",
+#   speedups
+    "uvloop~=0.17.0",
+    "ujson~=5.7.0",
+    "cchardet~=2.1.7",
+    "aiodns~=3.0.0"
 ]
 
 [project.urls]
