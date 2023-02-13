@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apidevtools"
-version = "1.0.5"
+version = "1.0.7"
 authors = [
     { name="cxllmerichie", email="cxllmerichie@gmail.com" },
 ]
@@ -38,10 +38,10 @@ dependencies=[
 #   datetime
     "python-dateutil~=2.8.2",
 #   speedups
-    "uvloop~=0.17.0",
     "ujson~=5.7.0",
-    "cchardet~=2.1.7",
-    "aiodns~=3.0.0"
+    "aiodns~=3.0.0",
+    #"cchardet~=2.1.7",
+    #"uvloop~=0.17.0"
 ]
 
 [project.urls]
