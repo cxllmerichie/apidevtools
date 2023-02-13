@@ -8,6 +8,7 @@ src/apidevtools/utils.py
 src/apidevtools.egg-info/PKG-INFO
 src/apidevtools.egg-info/SOURCES.txt
 src/apidevtools.egg-info/dependency_links.txt
+src/apidevtools.egg-info/requires.txt
 src/apidevtools.egg-info/top_level.txt
 src/apidevtools/avatar/__init__.py
 src/apidevtools/avatar/avatar.py
