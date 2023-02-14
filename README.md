@@ -36,11 +36,7 @@ pip install aiodns ujson cchardet uvloop
         ```
 - telegraph
     ```
-    pip install telegraph httpx aiohttp
-    ```
-    speedups:
-    ```
-    pip install aiodns cchardet  
+    pip install telegraph httpx aiohttp aiodns cchardet
     ```
 - datetime
     ```
