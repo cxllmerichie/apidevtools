@@ -3,6 +3,7 @@ README.md
 pyproject.toml
 src/apidevtools/__init__.py
 src/apidevtools/datetime.py
+src/apidevtools/logman.py
 src/apidevtools/telegraph.py
 src/apidevtools/utils.py
 src/apidevtools.egg-info/PKG-INFO

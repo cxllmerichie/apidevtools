@@ -21,6 +21,10 @@ pip install aiodns ujson cchardet uvloop
     ```
     pip install telegraph pillow numpy
     ```
+- logman
+    ```
+    pip install loguru
+    ```
 - security
     - hasher
         ```
@@ -42,6 +46,3 @@ pip install aiodns ujson cchardet uvloop
     ```
     pip install python-dateutil
     ```
-# Further updates:
-- import encapsulation (from outer_package import something as _something)
-

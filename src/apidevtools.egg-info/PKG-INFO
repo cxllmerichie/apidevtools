@@ -1,8 +1,9 @@
 Metadata-Version: 2.1
 Name: apidevtools
-Version: 1.0.9
+Version: 1.1.0
 Summary: All in one tools for API development.
 Author-email: cxllmerichie <cxllmerichie@gmail.com>
+Maintainer-email: cxllmerichie <cxllmerichie@gmail.com>
 License: MIT License
         
         Copyright (c) 2022-2023 cxllmerichie
@@ -26,6 +27,8 @@ License: MIT License
         SOFTWARE.
 Project-URL: Homepage, https://github.com/cxllmerichie/apidevtools
 Project-URL: Bug Tracker, https://github.com/cxllmerichie/apidevtools/issues
+Project-URL: Repository, https://github.com/cxllmerichie/apidevtools
+Project-URL: Documentation, https://github.com/cxllmerichie/apidevtools/README.md
 Classifier: Programming Language :: Python :: 3
 Classifier: Framework :: FastAPI
 Classifier: Topic :: Software Development
@@ -59,6 +62,10 @@ pip install aiodns ujson cchardet uvloop
     ```
     pip install telegraph pillow numpy
     ```
+- logman
+    ```
+    pip install loguru
+    ```
 - security
     - hasher
         ```
@@ -80,6 +87,3 @@ pip install aiodns ujson cchardet uvloop
     ```
     pip install python-dateutil
     ```
-# Further updates:
-- import encapsulation (from outer_package import something as _something)
-
