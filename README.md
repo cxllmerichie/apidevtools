@@ -19,7 +19,7 @@ pip install aiodns ujson cchardet uvloop
     ```
 - avatar
     ```
-    pip install telegraph pillow numpy
+    pip install telegraph httpx pillow numpy
     ```
 - logman
     ```
@@ -37,10 +37,6 @@ pip install aiodns ujson cchardet uvloop
 - telegraph
     ```
     pip install telegraph httpx aiohttp
-    ```
-    speedups:
-    ```
-    pip install aiodns cchardet  
     ```
 - datetime
     ```
