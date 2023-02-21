@@ -2,7 +2,6 @@ from abc import abstractmethod as _abstractmethod, ABC as _ABC
 from loguru._logger import Logger
 from typing import Any
 
-from .schema import Schema
 from .records import Records
 from .types import SchemaType, Record, Instance
 
@@ -38,7 +37,7 @@ class BaseORM(_ABC):
         ...
 
     @_abstractmethod
-    async def update(self, instance: Instance, where: str, schema_t: SchemaType = dict, tablename: str = None) -> Record:
+    async def update(self, instance: Instance, where: dict[str, Any], schema_t: SchemaType = dict, tablename: str = None) -> Record:
         ...
 
     @_abstractmethod

@@ -1,8 +1,12 @@
+from contextlib import redirect_stdout as _redirect_stdout
+import asyncio as _asyncio
 import io
 import PIL.Image
 
+from .telegraph import upload as _upload
 
-def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
+
+async def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
     """
     Create PIL.Image.Image from bytes or io.BytesIO.
     Also accepts PIL.Image.Image to simplify usage in Avatar and Image classes.
@@ -23,22 +27,21 @@ class Image:
     default_text = 'N/S'
 
     def __init__(self, image: bytes | io.BytesIO, default_text: str = default_text):
-        self.__image = convert(image)
+        with _redirect_stdout(None):
+            self.__image = _asyncio.get_event_loop().run_until_complete(convert(image))
         self.default_text = default_text
 
     @property
     def image(self) -> PIL.Image.Image:
         return self.__image
 
-    def bytes(self) -> bytes:
-        return self.bytesio().getvalue()
+    async def bytes(self) -> bytes:
+        return (await self.bytesio()).getvalue()
 
-    def bytesio(self) -> io.BytesIO:
+    async def bytesio(self) -> io.BytesIO:
         output = io.BytesIO()
         self.__image.save(output, 'PNG')
         return output
 
     async def url(self) -> str:
-        from ..telegraph import upload
-
-        return await upload(self.bytesio())
+        return await _upload(await self.bytesio())

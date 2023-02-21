@@ -1,7 +1,7 @@
 from pydantic import BaseModel as _BaseModel
-import datetime
 from abc import ABC as _ABC, abstractmethod as _abstractmethod
 from typing import Any
+import datetime
 
 from .relation import Relation
 

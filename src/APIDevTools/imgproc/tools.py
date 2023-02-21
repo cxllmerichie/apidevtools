@@ -3,11 +3,15 @@ import io
 from PIL import ImageDraw as _ImageDraw, ImageFont as _ImageFont
 import numpy as _np
 
-from .image import Image, convert
+from .image import Image, convert as _convert
 
 
-def generate(
-        text: str = Image.default_text, size: int = 512, fonttf='fonts/ARIALNB.TTF',
+class Font:
+    ARIALNB = './fonts/ARIALNB.ttf'
+
+
+async def generate(
+        text: str = Image.default_text, size: int = 512, fonttf=Font.ARIALNB,
         bg_color: tuple[int, int, int] = (0, 0, 0), font_color: tuple[int, int, int] = (255, 255, 255)
 ) -> Image:
     """
@@ -28,13 +32,13 @@ def generate(
     return Image(img)
 
 
-def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
+async def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
     """
     Crop any image to circle form.
     :param image:
     :return:
     """
-    img = convert(image)
+    img = await _convert(image)
     size = min(img.size)
     alpha = PIL.Image.new('L', img.size, 0)
     _ImageDraw.Draw(alpha).pieslice([0, 0, size, size], 0, 360, fill=255)
@@ -43,12 +47,12 @@ def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
     return Image(img)
 
 
-def default(text: str = Image.default_text) -> Image:
+async def default(text: str = Image.default_text) -> Image:
     """
-    Quick way to create an avatar from some text.
+    Quick way to create an imgproc from some text.
     :param text:
     :return:
     """
-    img = generate(text)
-    img = crop(img)
+    img = await generate(text)
+    img = await crop(img)
     return img

@@ -7,7 +7,7 @@ import loguru
 
 from .schema import Schema
 from .records import Records
-from .base import BaseORM
+from .baseorm import BaseORM
 from .types import SchemaType, Record, Instance
 
 
