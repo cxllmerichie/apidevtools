@@ -23,5 +23,6 @@ src/apidevtools/simpleorm/postgres.py
 src/apidevtools/simpleorm/records.py
 src/apidevtools/simpleorm/relation.py
 src/apidevtools/simpleorm/schema.py
+src/apidevtools/simpleorm/types.py
 src/apidevtools/template/__init__.py
 src/apidevtools/template/create.py

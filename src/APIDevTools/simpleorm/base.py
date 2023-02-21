@@ -4,9 +4,10 @@ from typing import Any
 
 from .schema import Schema
 from .records import Records
+from .types import SchemaType, Record, Instance
 
 
-class BaseStorage(_ABC):
+class BaseORM(_ABC):
     def __init__(self, database: str, host: str, port: str | int, user: str, password: str | None, logger: Logger):
         self.database: str = database
         self.host: str = host
@@ -29,13 +30,17 @@ class BaseStorage(_ABC):
         ...
 
     @_abstractmethod
-    async def select(self, query: str, args: tuple[Any, ...] = (), schema_type: type[Schema] = None) -> Records:
+    async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: SchemaType = dict, depth: int = 0) -> Records:
         ...
 
     @_abstractmethod
-    async def insert(self, schema: Schema, schema_type: type = None) -> Schema | dict[str, Any] | None:
+    async def insert(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Record:
         ...
 
     @_abstractmethod
-    async def update(self, schema: Schema, where: str, schema_type: type = None) -> Schema | dict[str, Any] | None:
+    async def update(self, instance: Instance, where: str, schema_t: SchemaType = dict, tablename: str = None) -> Record:
+        ...
+
+    @_abstractmethod
+    async def delete(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Record:
         ...

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apidevtools"
-version = "1.1.0"
+version = "1.1.3"
 authors = [
     { name="cxllmerichie", email="cxllmerichie@gmail.com" },
 ]
@@ -28,30 +28,28 @@ dependencies=[
     "asyncpg~=0.27.0",
     "pydantic~=1.10.4",
     "loguru~=0.6.0",
-#   avatar
+#   imgproc
     "Pillow~=9.4.0",
     "numpy~=1.24.2",
-#   security
-    "argon2-cffi~=21.3.0",
-    "pycryptodome~=3.17",
-#   telegraph
+
     "telegraph~=2.2.0",
     "httpx~=0.23.3",
     "aiohttp~=3.8.3",
-#   datetime
-    "python-dateutil~=2.8.2",
+#   security
+    "argon2-cffi~=21.3.0",
+    "pycryptodome~=3.17",
 #   speedups
     "ujson~=5.7.0",
     "aiodns~=3.0.0",
     #"cchardet~=2.1.7",
     #"uvloop~=0.17.0"
 ]
-
-[tool.poetry]
-exclude = ["__pycache__"]
+#
+#[tool.poetry]
+#exclude = ["__pycache__"]
 
 [tool.setuptools.package-data]
-apidevtools = ["template.zip"]
+apidevtools = ["template/template.zip", "avatar/fonts/*.ttf"]
 
 [project.urls]
 "Homepage" = "https://github.com/cxllmerichie/apidevtools"

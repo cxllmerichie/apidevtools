@@ -1,2 +1,2 @@
 from .hasher import hash, cmp, error
-from .encryptor import encrypt, decrypt, key
+from .encryptor import encrypt, decrypt

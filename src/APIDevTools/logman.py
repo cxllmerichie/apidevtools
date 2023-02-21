@@ -4,11 +4,11 @@ from sys import stderr as _stderr
 
 
 class LoggerManager:
-    def __init__(self, format: str = '{level.icon} <yellow>|</yellow> '
-                                     '<blue>{time:YYYY-MM-DD HH:mm:ss}</blue> '
-                                     '<yellow>|</yellow> {level.name} - {message}'):
+    format: str = '{level.icon} <yellow>|</yellow> <blue>{time:YYYY-MM-DD HH:mm:ss}</blue> <yellow>|</yellow> {level.name} - {message}'
+
+    def __init__(self, format: str = format):
+        _logger.configure(handlers=[{'sink': _stderr, 'format': format}])
         self.format = format
-        _logger.configure(handlers=[{'sink': _stderr, 'format': self.format}])
 
     def add(self, name: str, path: str, rotation: str = '20 MB', retention: str = '30 days') -> Logger:
         _logger.add(path, enqueue=True, backtrace=True, diagnose=True, format=self.format,
