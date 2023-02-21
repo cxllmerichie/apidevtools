@@ -1,12 +1,5 @@
 asyncpg~=0.27.0
 pydantic~=1.10.4
 loguru~=0.6.0
-Pillow~=9.4.0
-numpy~=1.24.2
-telegraph~=2.2.0
-httpx~=0.23.3
-aiohttp~=3.8.3
 argon2-cffi~=21.3.0
-pycryptodome~=3.17
 ujson~=5.7.0
-aiodns~=3.0.0

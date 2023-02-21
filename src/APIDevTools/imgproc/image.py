@@ -1,9 +1,8 @@
-from contextlib import redirect_stdout as _redirect_stdout
-import asyncio as _asyncio
 import io
 import PIL.Image
 
 from .telegraph import upload as _upload
+from ..utils import asyncinit
 
 
 async def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
@@ -15,24 +14,23 @@ async def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Imag
     """
     if not isinstance(image, PIL.Image.Image):
         if isinstance(image, Image):
-            image = image.bytesio()
+            image = await image.bytesio()
         elif isinstance(image, bytes):
             image = io.BytesIO(image)
         return PIL.Image.open(image)
     return image
 
 
+@asyncinit
 class Image:
     __image: PIL.Image.Image
     default_text = 'N/S'
 
-    def __init__(self, image: bytes | io.BytesIO, default_text: str = default_text):
-        with _redirect_stdout(None):
-            self.__image = _asyncio.get_event_loop().run_until_complete(convert(image))
+    async def __init__(self, image: bytes | io.BytesIO, default_text: str = default_text):
+        self.__image = await convert(image)
         self.default_text = default_text
 
-    @property
-    def image(self) -> PIL.Image.Image:
+    async def image(self) -> PIL.Image.Image:
         return self.__image
 
     async def bytes(self) -> bytes:

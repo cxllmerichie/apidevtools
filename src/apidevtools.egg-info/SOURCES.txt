@@ -13,6 +13,7 @@ src/apidevtools/imgproc/__init__.py
 src/apidevtools/imgproc/image.py
 src/apidevtools/imgproc/telegraph.py
 src/apidevtools/imgproc/tools.py
+src/apidevtools/imgproc/fonts/ARIALNB.TTF
 src/apidevtools/security/__init__.py
 src/apidevtools/security/encryptor.py
 src/apidevtools/security/hasher.py

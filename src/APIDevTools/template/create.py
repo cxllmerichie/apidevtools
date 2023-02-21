@@ -1,12 +1,14 @@
 from argparse import ArgumentParser as _ArgumentParser
 from zipfile import ZipFile as _ZipFile
-from os import rename as _rename
+import os as _os
+import site as _site
 
 
 def create(path: str = '.', name: str = 'template'):
-    with _ZipFile('template.zip', 'r') as template_zip_file:
+    root = _os.path.join(_site.getsitepackages()[1])
+    with _ZipFile(_os.path.join(root, 'template', 'template.zip'), 'r') as template_zip_file:
         template_zip_file.extractall(path)
-    _rename(f'{path}\\template', f'{path}\\{name}')
+    _os.rename(_os.path.join(path, 'template'), _os.path.join(path, name))
 
 
 if __name__ == '__main__':

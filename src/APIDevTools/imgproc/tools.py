@@ -2,18 +2,30 @@ import PIL.Image
 import io
 from PIL import ImageDraw as _ImageDraw, ImageFont as _ImageFont
 import numpy as _np
+import pathlib as _pathlib
+import site as _site
+import os as _os
 
 from .image import Image, convert as _convert
 
 
 class Font:
-    ARIALNB = './fonts/ARIALNB.ttf'
+    ARIALNB = _os.path.join(_os.path.join(_site.getsitepackages()[1], 'apidevtools'), 'imgproc', 'fonts', 'ARIALNB.ttf')
+
+    @staticmethod
+    def fonts() -> list[str]:
+        if _os.name != 'nt':
+            raise OSError('system font list is available only for windows now')
+        fonts_path = _pathlib.PurePath(_pathlib.Path.home().drive, _os.sep, 'windows', 'fonts')
+        return [str(path.absolute()) for path in list(_pathlib.Path(fonts_path).glob('*.ttf'))]
 
 
 async def generate(
         text: str = Image.default_text, size: int = 512, fonttf=Font.ARIALNB,
         bg_color: tuple[int, int, int] = (0, 0, 0), font_color: tuple[int, int, int] = (255, 255, 255)
 ) -> Image:
+    fonttf = Font.fonts()[0]
+    print(fonttf, type(fonttf))
     """
     Generate image from apidevtools.image.Image. Supposed to be used as for instance: user
     By default has "N/A" white text on the black background.
@@ -29,7 +41,7 @@ async def generate(
     draw = _ImageDraw.Draw(img)
     _, _, width, height = draw.textbbox((0, 0), text, font=font)
     draw.text(xy=((size - width) / 2, (size - height) / 3), text=text, font=font, fill=font_color)
-    return Image(img)
+    return await Image(img)
 
 
 async def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
@@ -44,7 +56,7 @@ async def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
     _ImageDraw.Draw(alpha).pieslice([0, 0, size, size], 0, 360, fill=255)
     img = PIL.Image.fromarray(_np.dstack((_np.array(img), _np.array(alpha))))
     img = img.crop((0, 0, size, size))
-    return Image(img)
+    return await Image(img)
 
 
 async def default(text: str = Image.default_text) -> Image:
