@@ -62,7 +62,7 @@ class PostgreSQL(BaseORM):
             for index, record in enumerate(records.all()):
                 for relation in record.relations():
                     columns = ', '.join([f'"{column}"' if column != '*' else '*' for column in relation.columns])
-                    conditions = ' and '.join(
+                    conditions = ' AND '.join(
                         [f'"{key}" = ${index + 1}' for index, key in enumerate(list(relation.where.keys()))])
                     query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(
                         relation.where.values())
@@ -87,7 +87,7 @@ class PostgreSQL(BaseORM):
     async def update(self, instance: Instance, where: dict[str, Any], schema_t: SchemaType = dict, tablename: str = None) -> Record:
         instance, tablename = self.__parse_params(instance, tablename)
         values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
-        conditions = ' and '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
+        conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
         query, args = f'UPDATE "{tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values())
         async with self as connection:
             records = await connection.fetch(query, *args)
@@ -95,7 +95,7 @@ class PostgreSQL(BaseORM):
 
     async def delete(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Record:
         instance, tablename = self.__parse_params(instance, tablename)
-        outer_conditions = ' and '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
+        outer_conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         query, args = f'SELECT * FROM "{tablename}" WHERE {outer_conditions};', tuple(instance.values())
         records = await self.select(query, args, schema_t)
         for index, record in enumerate(records.all()):
@@ -103,7 +103,7 @@ class PostgreSQL(BaseORM):
                 break
             for relation in record.relations():
                 columns = ', '.join([f'"{column}"' if column != '*' else '*' for column in relation.columns])
-                conditions = ' and '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(list(relation.where.keys()))])
+                conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(list(relation.where.keys()))])
                 query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(relation.where.values())
                 instances = (await self.select(query, args, relation.rel_schema_t, 1)).all()
                 for inst in instances:

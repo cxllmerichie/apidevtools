@@ -5,7 +5,7 @@ import site as _site
 
 
 def create(path: str = '.', name: str = 'template'):
-    root = _os.path.join(_site.getsitepackages()[1])
+    root = _os.path.join(_site.getsitepackages()[1], 'apidevtools')
     with _ZipFile(_os.path.join(root, 'template', 'template.zip'), 'r') as template_zip_file:
         template_zip_file.extractall(path)
     _os.rename(_os.path.join(path, 'template'), _os.path.join(path, name))

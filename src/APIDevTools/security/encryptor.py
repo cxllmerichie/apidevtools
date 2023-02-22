@@ -12,14 +12,26 @@ def __cipher(key: KeyType, iv: bytes) -> _CfbMode:
     return _AES.new(key, _AES.MODE_CFB, iv)
 
 
-def encrypt(to_encrypt: Any, key: KeyType) -> tuple[bytes, bytes]:
-    iv = _Random.new().read(_AES.block_size)
+def __convert(value: bytes) -> Any:
+    string = value.decode()
+    if string.isnumeric():
+        if string.isdecimal():
+            return float(value)
+        return int(value)
+    return string
+
+
+def randiv() -> bytes:
+    return _Random.new().read(_AES.block_size)
+
+
+def encrypt(to_encrypt: Any, key: KeyType, iv: bytes = randiv()) -> tuple[bytes, bytes]:
     to_encrypt_bytes = str(to_encrypt).encode()
     encrypted_bytes = iv + __cipher(key, iv).encrypt(to_encrypt_bytes)
     return encrypted_bytes, iv
 
 
-def decrypt(encrypted: bytes | str, key: KeyType, iv: bytes) -> bytes:
+def decrypt(encrypted: bytes | str, key: KeyType, iv: bytes, convert: bool = True) -> bytes | Any:
     encrypted_bytes = encrypted if isinstance(encrypted, bytes) else encrypted.decode()
     decrypted_bytes = __cipher(key, iv).decrypt(encrypted_bytes)[len(iv):]
-    return decrypted_bytes
+    return __convert(decrypted_bytes) if convert else decrypted_bytes

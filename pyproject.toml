@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apidevtools"
-version = "1.1.4"
+version = "1.1.7"
 authors = [
     { name="cxllmerichie", email="cxllmerichie@gmail.com" },
 ]
@@ -16,11 +16,23 @@ readme = "README.md"
 license = { file="LICENSE.txt" }
 requires-python = ">=3.10"
 classifiers = [
-    "Programming Language :: Python :: 3",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3.10",
+
+    "Natural Language :: English",
+
+    "Development Status :: 4 - Beta",
+
     "Framework :: FastAPI",
-    "Topic :: Software Development",
+
     "Intended Audience :: Developers",
+
     "Operating System :: OS Independent",
+
     "License :: OSI Approved :: MIT License"
 ]
 dependencies=[
@@ -48,7 +60,7 @@ dependencies=[
 ]
 
 [tool.setuptools.package-data]
-apidevtools = ["template/template.zip", "imgproc/fonts/*.ttf"]
+apidevtools = ["template/template.zip"]
 
 [project.urls]
 "Homepage" = "https://github.com/cxllmerichie/apidevtools"

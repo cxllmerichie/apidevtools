@@ -7,14 +7,6 @@ from .relation import Relation
 
 
 class Schema(_BaseModel, _ABC):
-    def serializable(self, types: tuple[type, ...] = (datetime.datetime, datetime.date, datetime.time)) -> dict[str: Any]:
-        """
-        Returns python dictionary of values which will not trigger FastAPI error related to not serializable objects
-        :param types:
-        :return:
-        """
-        return {key: str(value) if isinstance(value, types) else value for key, value in dict(self).items()}
-
     @property
     @_abstractmethod
     def __tablename__(self) -> str:
@@ -35,10 +27,32 @@ class Schema(_BaseModel, _ABC):
     def relations(self) -> list[Relation]:
         return []
 
+    def serializable(self, types: tuple[type, ...] = (datetime.datetime, datetime.date, datetime.time)) -> dict[str: Any]:
+        """
+        Returns python dictionary of values which will not trigger FastAPI error related to not serializable objects
+        :param types:
+        :return:
+        """
+        return {key: str(value) if isinstance(value, types) else value for key, value in dict(self).items()}
+
     def pretty(self) -> 'Schema':
         """
         Assign prettified values to Schema.properties.
         For instance: self.email = self.email.lower(); self.surname = self.surname.capitalize; return self;
+        :return:
+        """
+        return self
+
+    def encrypted(self) -> 'Schema':
+        """
+        encrypt properties and return self
+        :return:
+        """
+        return self
+
+    def decrypted(self) -> 'Schema':
+        """
+        decrypt properties and return self
         :return:
         """
         return self
