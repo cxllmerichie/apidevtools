@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: apidevtools
-Version: 1.1.6
+Version: 1.1.8
 Summary: All in one tools for API development.
 Author-email: cxllmerichie <cxllmerichie@gmail.com>
 Maintainer-email: cxllmerichie <cxllmerichie@gmail.com>
@@ -29,9 +29,14 @@ Project-URL: Homepage, https://github.com/cxllmerichie/apidevtools
 Project-URL: Bug Tracker, https://github.com/cxllmerichie/apidevtools/issues
 Project-URL: Repository, https://github.com/cxllmerichie/apidevtools
 Project-URL: Documentation, https://github.com/cxllmerichie/apidevtools/README.md
-Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Security :: Cryptography
+Classifier: Topic :: Database :: Front-Ends
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Natural Language :: English
+Classifier: Development Status :: 4 - Beta
 Classifier: Framework :: FastAPI
-Classifier: Topic :: Software Development
 Classifier: Intended Audience :: Developers
 Classifier: Operating System :: OS Independent
 Classifier: License :: OSI Approved :: MIT License

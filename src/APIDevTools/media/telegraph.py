@@ -1,9 +1,9 @@
-from telegraph.aio import Telegraph as _Telegraph
-from aiohttp import ClientSession as _ClientSession
+import telegraph as _telegraph
+import aiohttp as _aiohttp
 import io
 
 
-__telegraph: _Telegraph = _Telegraph()
+__telegraph: _telegraph.Telegraph = _telegraph.Telegraph()
 
 
 async def upload(files: io.BytesIO | str | list[io.BytesIO | str]) -> None | str | list[str]:
@@ -27,7 +27,7 @@ async def download(url: str) -> bytes | None:
     :param url:
     :return:
     """
-    async with _ClientSession() as session:
+    async with _aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
                 return await response.read()

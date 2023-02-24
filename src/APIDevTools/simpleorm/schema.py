@@ -35,24 +35,9 @@ class Schema(_BaseModel, _ABC):
         """
         return {key: str(value) if isinstance(value, types) else value for key, value in dict(self).items()}
 
-    def pretty(self) -> 'Schema':
-        """
-        Assign prettified values to Schema.properties.
-        For instance: self.email = self.email.lower(); self.surname = self.surname.capitalize; return self;
-        :return:
-        """
+    def into_db(self) -> 'Schema':
         return self
 
-    def encrypted(self) -> 'Schema':
-        """
-        encrypt properties and return self
-        :return:
-        """
+    def from_db(self) -> 'Schema':
         return self
 
-    def decrypted(self) -> 'Schema':
-        """
-        decrypt properties and return self
-        :return:
-        """
-        return self

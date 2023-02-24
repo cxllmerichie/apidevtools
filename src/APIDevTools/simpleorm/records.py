@@ -9,7 +9,7 @@ class Records:
         if schema_t is dict:
             item_t, item = dict, lambda record: dict(record)
         else:
-            item_t, item = Schema, lambda record: schema_t(**dict(record))
+            item_t, item = Schema, lambda record: schema_t(**dict(record)).from_db()
         self.records: list[item_t] = [item(record) for record in records]
 
     def all(self) -> list[Record]:

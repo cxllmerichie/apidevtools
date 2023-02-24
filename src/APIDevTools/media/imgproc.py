@@ -5,7 +5,7 @@ import numpy as _np
 import pathlib as _pathlib
 import os as _os
 
-from .telegraph import upload as _upload
+from . import telegraph as _telegraph
 
 
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
@@ -26,11 +26,11 @@ def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
 
 class Image:
     image: PIL.Image.Image
-    default_text = 'N/S'
+    text = 'N/S'
 
-    def __init__(self, image: bytes | io.BytesIO, default_text: str = default_text):
+    def __init__(self, image: bytes | io.BytesIO, text: str = text):
         self.image = convert(image)
-        self.default_text = default_text
+        self.text = text
 
     @property
     def bytes(self) -> bytes:
@@ -43,7 +43,7 @@ class Image:
         return output
 
     async def url(self) -> str:
-        return await _upload(self.bytesio)
+        return await _telegraph.upload(self.bytesio)
 
 
 class Font:
@@ -71,8 +71,8 @@ class Font:
         return ttf[0] if len(ttf) else Font.font('ARIALNB')
 
 
-async def generate(
-        text: str = Image.default_text, size: int = 512, fonttf=Font.font('ARIALNB'),
+def generate(
+        text: str = Image.text, size: int = 512, fonttf=Font.font('ARIALNB'),
         bg_color: tuple[int, int, int] = (0, 0, 0), font_color: tuple[int, int, int] = (255, 255, 255)
 ) -> Image:
     """
@@ -90,10 +90,10 @@ async def generate(
     draw = _ImageDraw.Draw(img)
     _, _, width, height = draw.textbbox((0, 0), text, font=font)
     draw.text(xy=((size - width) / 2, (size - height) / 3), text=text, font=font, fill=font_color)
-    return Image(img)
+    return Image(img, text)
 
 
-async def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
+def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
     """
     Crop any image to circle form.
     :param image:
@@ -108,12 +108,10 @@ async def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
     return Image(img)
 
 
-async def default(text: str = Image.default_text) -> Image:
+def default(text: str = Image.text) -> Image:
     """
-    Quick way to create an media from some text.
+    Quick way to create am image from some text.
     :param text:
     :return:
     """
-    img = await generate(text)
-    img = await crop(img)
-    return img
+    return crop(generate(text))
