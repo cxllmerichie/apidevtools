@@ -60,9 +60,8 @@ class PostgreSQL(BaseORM):
         if depth > 0 and schema_t is not dict:
             for index, record in enumerate(records.all()):
                 for relation in record.relations():
-                    columns = ', '.join([f'"{column}"' if column != '*' else '*' for column in relation.columns])
-                    conditions = ' AND '.join(
-                        [f'"{key}" = ${index + 1}' for index, key in enumerate(list(relation.where.keys()))])
+                    columns = ', '.join(relation.columns)
+                    conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(relation.where.keys())])
                     query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(
                         relation.where.values())
                     instances = (await self.select(query, args, relation.rel_schema_t, depth - 1)).all()
@@ -75,11 +74,8 @@ class PostgreSQL(BaseORM):
         return records
 
     async def insert(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Record:
-        instance, tablename = self.__parse_params(instance, tablename)
+        instance, tablename = await self.__parse_parameters(instance, tablename)
         placeholders = ', '.join([f'${index + 1}' for index in range(len(instance.keys()))])
-        # ISSUE 1:
-        #   if instance with relational column passed, error raised because there is no such a column in the db
-        #   fix: get table column names from db, and take minimum length object among "columns" and "instance.keys()"
         columns, values = str(tuple(instance.keys())).replace("'", '"'), instance.values()
         query, args = f'INSERT INTO "{tablename}" {columns} VALUES ({placeholders}) RETURNING *;', values
         async with self as connection:
@@ -87,11 +83,8 @@ class PostgreSQL(BaseORM):
         return Records(records, schema_t).first()
 
     async def update(self, instance: Instance, where: dict[str, Any], schema_t: SchemaType = dict, tablename: str = None) -> Records:
-        instance, tablename = self.__parse_params(instance, tablename)
+        instance, tablename = await self.__parse_parameters(instance, tablename)
         values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
-        # ISSUE 1:
-        #   if instance with relational column passed, error raised because there is no such a column in the db
-        #   fix: get table column names from db, and take minimum length object among "columns" and "instance.keys()"
         conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
         query, args = f'UPDATE "{tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values())
         async with self as connection:
@@ -99,13 +92,10 @@ class PostgreSQL(BaseORM):
         return Records(records, schema_t)
 
     async def delete(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Records:
-        instance, tablename = self.__parse_params(instance, tablename)
-        # ISSUE 1:
-        #   if instance with relational column passed, error raised because there is no such a column in the db
-        #   fix: get table column names from db, and take minimum length object among "columns" and "instance.keys()"
+        instance, tablename = await self.__parse_parameters(instance, tablename)
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         query, args = f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
-        # ISSUE 2:
+        # ISSUE 1:
         #   attaching removed relational children to this "records"
         records = await self.select(query, args, schema_t)
         for index, record in enumerate(records.all()) if schema_t is not dict else ():
@@ -120,15 +110,27 @@ class PostgreSQL(BaseORM):
         query, args = f'DELETE FROM "{tablename}" WHERE {conditions} RETURNING *;', tuple(instance.values())
         async with self as connection:
             records = await connection.fetch(query, *args)
-        # ISSUE 2 (continuation):
+        # ISSUE 1 (continuation):
         #   but returning another records
         return Records(records, schema_t)
 
-    def __parse_params(self, instance: Instance, tablename: str) -> tuple[Record, str]:
+    async def __parse_instance(self, instance: dict[str, Any], tablename: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
+        query, args = 'SELECT "column_name" FROM information_schema.columns WHERE "table_name" = $1;', (tablename,)
+        async with self as connection:
+            db_columns = [record['column_name'] for record in Records(await connection.fetch(query, *args)).all()]
+        instance_columns = set(instance.keys())
+        columns = instance_columns.intersection(db_columns)
+        for key in instance_columns.difference(db_columns):
+            if key not in columns:
+                instance.pop(key)
+        return tuple(columns), tuple([instance[column] for column in columns])
+
+    async def __parse_parameters(self, instance: Instance, tablename: str) -> tuple[Record, str]:
         if isinstance(instance, Schema):
             tablename = instance.tablename
             instance = dict(instance.into_db())
-        if not tablename and isinstance(instance, dict):
+        if not tablename:
             raise AttributeError('Specify "tablename" if "instance" is a "dict" type, otherwise pass '
                                  '"Schema" type object with overwritten property "__tablename__"')
+        await self.__parse_instance(instance, tablename)
         return instance, tablename
