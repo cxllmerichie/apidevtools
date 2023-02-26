@@ -1,19 +1,22 @@
+import dotenv
 import subprocess
+import toml
 import os
-from dotenv import load_dotenv
 
 
 if __name__ == '__main__':
-    assert load_dotenv('../.env')
+    assert dotenv.load_dotenv('.env')
 
-    VERSION: str = '2.0.0'
+    with open('../pyproject.toml', 'r') as file:
+        parser = toml.loads(file.read())
+
+    VERSION: str = parser['project']['version']
     PYPI_USERNAME: str = os.getenv('PYPI_USERNAME')
     PYPI_PASSWORD: str = os.getenv('PYPI_PASSWORD')
 
-    file = os.path.abspath('compose.yml')
     commands = [
-        'python -m build',
-        f'python -m twine upload ../dist/apidevtools-{VERSION}*'
+        'python -m build ../ --outdir ../dist',
+        f'python -m twine upload ../dist/apidevtools-{VERSION}* -u{PYPI_USERNAME} -p{PYPI_PASSWORD}'
     ]
     for command in commands:
         print(f'{command}')
