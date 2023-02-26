@@ -1,6 +1,6 @@
 import dotenv
 import subprocess
-import toml
+import tomli
 import os
 
 
@@ -8,9 +8,9 @@ if __name__ == '__main__':
     assert dotenv.load_dotenv('.env')
 
     with open('../pyproject.toml', 'r') as file:
-        parser = toml.loads(file.read())
+        toml = tomli.loads(file.read())
 
-    VERSION: str = parser['project']['version']
+    VERSION: str = toml['project']['version']
     PYPI_USERNAME: str = os.getenv('PYPI_USERNAME')
     PYPI_PASSWORD: str = os.getenv('PYPI_PASSWORD')
 

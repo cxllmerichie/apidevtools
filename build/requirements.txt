@@ -23,7 +23,6 @@ requests-toolbelt==0.10.1
 rfc3986==2.0.0
 rich==13.3.1
 six==1.16.0
-toml==0.10.2
 tomli==2.0.1
 twine==4.0.2
 urllib3==1.26.14

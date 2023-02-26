@@ -1,5 +1,7 @@
 .idea/
 .venv/
 __pycache__/
+
+dist/
 src/apidevtools.egg-info/
 *.env
