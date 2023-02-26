@@ -92,6 +92,8 @@ class PostgreSQL(BaseORM):
         return Records(records, schema_t)
 
     async def delete(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Records:
+        # Method successfully removes the instance from the database. Supposed to return the instance and all
+        # related to it instances (children relations), but returns only the instance itself, because of the issue below
         instance, tablename = await self.__parse_parameters(instance, tablename)
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         query, args = f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
