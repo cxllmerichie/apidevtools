@@ -12,7 +12,7 @@ from .types import SchemaType, Record, Instance
 
 class PostgreSQL:
     def __init__(self, database: str,
-                 host: str = 'localhost', port: str | int = 5432,
+                 host: str = 'localhost', port: int | str = 5432,
                  user: str = 'postgres', password: str | None = None,
                  logger: Logger = loguru.logger):
         self.database: str = database
@@ -49,7 +49,7 @@ class PostgreSQL:
         except AttributeError:
             self.logger.error('Attempting to create connection with not acquired pool')
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
         try:
             await self.__pool.release(self.__connection)
         except _exceptions.InterfaceError:
@@ -65,10 +65,9 @@ class PostgreSQL:
         if depth > 0 and schema_t is not dict:
             for index, record in enumerate(records.all()):
                 for relation in record.relations():
-                    columns = ', '.join(relation.columns)
+                    columns, values = ', '.join(relation.columns), tuple(relation.where.values())
                     conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(relation.where.keys())])
-                    query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', tuple(
-                        relation.where.values())
+                    query, args = f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', values
                     instances = (await self.select(query, args, relation.rel_schema_t, depth - 1)).all()
                     if isinstance(record, dict):
                         record[relation.fieldname] = instances

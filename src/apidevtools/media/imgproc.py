@@ -11,7 +11,7 @@ from . import telegraph as _telegraph
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
     """
     Create PIL.Image.Image from bytes or io.BytesIO.
-    Also accepts PIL.Image.Image to simplify usage in Avatar and Image classes.
+    Also accepts PIL.Image.Image to simplify usage in and Image classes.
     :param image:
     :return:
     """
@@ -65,8 +65,7 @@ class Font:
         :param ttf_name:
         :return:
         """
-        # https://www.geeksforgeeks.org/python-word-similarity-using-spacy/
-        # try the similarity approach
+        # try the similarity approach https://www.geeksforgeeks.org/python-word-similarity-using-spacy/
         ttf = list(filter(lambda filepath: _os.path.basename(filepath).split('.')[0] == ttf_name, Font.system()))
         return ttf[0] if len(ttf) else Font.font('ARIALNB')
 

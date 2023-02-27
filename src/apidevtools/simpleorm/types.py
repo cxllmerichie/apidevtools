@@ -3,6 +3,6 @@ from typing import Any
 from .schema import Schema
 
 
-Instance = dict | Schema
-SchemaType = type[dict | Schema]
+Instance = dict[str, Any] | Schema
+SchemaType = type[dict[str, Any] | Schema]
 Record = dict[str, Any] | Schema | None
