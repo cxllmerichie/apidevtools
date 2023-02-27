@@ -17,14 +17,6 @@ pip install aiodns ujson cchardet uvloop
     ```
     pip install asyncpg pydantic loguru
     ```
-- media
-    ```
-    pip install pillow numpy aiohttp
-    ```
-- logman
-    ```
-    pip install loguru
-    ```
 - security
     - hasher
         ```
@@ -34,3 +26,16 @@ pip install aiodns ujson cchardet uvloop
         ```
         pip install pycryptodome
         ```
+- media
+    - imgproc
+        ```
+        pip install pillow numpy
+        ```
+    - telegraph
+        ```
+        pip install aiohttp
+        ```
+- logman
+    ```
+    pip install loguru
+    ```

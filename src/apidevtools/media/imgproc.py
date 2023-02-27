@@ -5,8 +5,6 @@ import numpy as _np
 import pathlib as _pathlib
 import os as _os
 
-from . import telegraph as _telegraph
-
 
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
     """
@@ -42,8 +40,13 @@ class Image:
         self.image.save(output, 'PNG')
         return output
 
-    async def url(self) -> str:
-        return await _telegraph.upload(self.bytesio)
+    async def url(self, attempts: int = 5) -> str | None:
+        from . import telegraph
+
+        attempt = 1
+        while not (url := await telegraph.upload(self.bytesio)) and attempt <= attempts:
+            url, attempt = await telegraph.upload(self.bytesio), attempt + 1
+        return url
 
 
 class Font:
