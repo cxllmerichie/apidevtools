@@ -28,7 +28,7 @@ class Image:
     image: PIL.Image.Image
     text = 'N/S'
 
-    def __init__(self, image: bytes | io.BytesIO, text: str = text):
+    def __init__(self, image: bytes | io.BytesIO | PIL.Image.Image, text: str = text):
         self.image = convert(image)
         self.text = text
 

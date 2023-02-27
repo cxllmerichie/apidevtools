@@ -6,7 +6,7 @@ pip install apidevtools
 ```
 ### Package dependencies
 ```
-pip install asyncpg pydantic loguru telegraph pillow numpy argon2-cffi pycryptodome telegraph httpx aiohttp
+pip install asyncpg pydantic loguru pillow numpy argon2-cffi pycryptodome aiohttp
 ```
 speedups
 ```
@@ -17,9 +17,9 @@ pip install aiodns ujson cchardet uvloop
     ```
     pip install asyncpg pydantic loguru
     ```
-- imgproc
+- media
     ```
-    pip install telegraph httpx pillow numpy telegraph httpx aiohttp
+    pip install pillow numpy aiohttp
     ```
 - logman
     ```

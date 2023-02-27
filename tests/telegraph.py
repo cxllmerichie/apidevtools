@@ -1,32 +1,15 @@
-import telegraph as _telegraph
-import aiohttp as _aiohttp
-import io
-
-
-__telegraph: _telegraph.Telegraph = _telegraph.Telegraph()
-
-
-async def upload(files: io.BytesIO | str | list[io.BytesIO | str]) -> None | str | list[str]:
-    """
-    Upload media to telegra.ph
-    :param files:
-    :return:
-    """
-    sources: list = await __telegraph.upload_file(f=files)
-    urls = [f"https://telegra.ph{source.get('src')}" for source in sources]
-    if len(urls) == 1:
-        return urls[0]
-    if len(urls) > 1:
-        return urls
-    return None
+from src.apidevtools.media.telegraph import upload, download
 from asyncio import get_event_loop
+from src.apidevtools.media.imgproc import default
+from io import BytesIO
 
 
 if __name__ == '__main__':
     loop = get_event_loop()
 
-    with open('LDR.jpg', 'rb') as file:
-        img_bytes = file.read()
-        img = Image(img_bytes)
-        url = loop.run_until_complete(upload(img.bytesio))
-        print(url)
+    # with open('LDR.jpg', 'rb') as file:
+    #     img = BytesIO(file.read())
+    #     url = loop.run_until_complete(upload(img))
+    #     print(url)
+
+    data = loop.run_until_complete(download('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/800px-Image_created_with_a_mobile_phone.png'))
