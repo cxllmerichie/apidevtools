@@ -9,8 +9,7 @@ __hasher: _PasswordHasher = _PasswordHasher()
 
 def hash(password: str) -> str:
     """
-    Overwrite the method, if prefer another algorithm not changing the func name.
-    Purpose: creates hash of password.
+
     :param password: plain password string
     :return: hashed password string
     """
@@ -19,8 +18,7 @@ def hash(password: str) -> str:
 
 def cmp(pw_hash: str, password: str) -> bool:
     """
-    Overwrite the method, if prefer another algorithm not changing the func name.
-    Purpose: compares hash and password.
+
     :param pw_hash: hashed password string
     :param password: plain password string
     :return: True if password matches, False otherwise

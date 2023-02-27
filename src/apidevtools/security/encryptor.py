@@ -2,7 +2,7 @@ from Crypto.Cipher import AES as _AES
 from Crypto import Random as _Random
 from Crypto.Cipher._mode_cfb import CfbMode as _CfbMode
 from typing import Any
-import ast
+import ast as _ast
 
 
 KeyType = bytes | str
@@ -26,4 +26,4 @@ def encrypt(to_encrypt: Any, key: KeyType, iv: bytes = randiv()) -> tuple[bytes,
 def decrypt(encrypted: bytes | str, key: KeyType, iv: bytes, convert: bool = False) -> bytes | Any:
     encrypted_bytes = encrypted if isinstance(encrypted, bytes) else encrypted.decode()
     decrypted_bytes = __cipher(key, iv).decrypt(encrypted_bytes)[len(iv):]
-    return decrypted_bytes if not convert else ast.literal_eval(decrypted_bytes.decode())
+    return decrypted_bytes if not convert else _ast.literal_eval(decrypted_bytes.decode())

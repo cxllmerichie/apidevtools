@@ -1,22 +1,27 @@
-from typing import Any
 from asyncpg.pool import create_pool as _create_pool, Pool as _Pool
 from asyncpg.connection import Connection as _Connection
 from asyncpg import exceptions as _exceptions
 from loguru._logger import Logger
+from typing import Any
 import loguru
 
 from .schema import Schema
 from .records import Records
 from .types import SchemaType, Record, Instance
-from .baseorm import BaseORM
 
 
-class PostgreSQL(BaseORM):
+class PostgreSQL:
     def __init__(self, database: str,
                  host: str = 'localhost', port: str | int = 5432,
                  user: str = 'postgres', password: str | None = None,
                  logger: Logger = loguru.logger):
-        super().__init__(database, host, port, user, password, logger)
+        self.database: str = database
+        self.host: str = host
+        self.port: str | int = port
+        self.user: str = user
+        self.password: str | None = password
+
+        self.logger: Logger = logger
 
         self.__pool: _Pool | None = None
         self.__connection: _Connection | None = None

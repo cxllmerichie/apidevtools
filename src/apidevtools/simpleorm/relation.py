@@ -1,9 +1,14 @@
+from typing import Any
+
+from .types import SchemaType
+
+
 class Relation:
-    def __init__(self, tablename: str, where: dict, ext_schema_t: type, fieldname: str,
-                 rel_schema_t: type = dict, columns: list[str] = None):
+    def __init__(self, tablename: str, where: dict[str, Any], ext_schema_t: SchemaType, fieldname: str,
+                 rel_schema_t: SchemaType = dict, columns: list[str] = None):
         self.tablename: str = tablename
-        self.where: dict = where
-        self.ext_schema_t: type = ext_schema_t
+        self.where: dict[str, Any] = where
+        self.ext_schema_t: SchemaType = ext_schema_t
         self.fieldname: str = fieldname
-        self.rel_schema_t: type = rel_schema_t
+        self.rel_schema_t: SchemaType = rel_schema_t
         self.columns: list[str] = columns if columns else ['*']
