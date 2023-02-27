@@ -1,12 +1,13 @@
-from pydantic import BaseModel as _BaseModel
-from abc import ABC as _ABC, abstractmethod as _abstractmethod
+from pydantic import BaseModel
+from abc import ABC
+from abc import abstractmethod as _abstractmethod
 from typing import Any
 import datetime
 
 from .relation import Relation
 
 
-class Schema(_BaseModel, _ABC):
+class Schema(BaseModel, ABC):
     @property
     @_abstractmethod
     def __tablename__(self) -> str:

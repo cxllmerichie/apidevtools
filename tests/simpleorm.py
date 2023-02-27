@@ -68,7 +68,7 @@ class Category(CategoryBase):
 
     def relations(self) -> list[Relation]:
         return [
-            Relation('item', dict(category_id=id), User, 'items', Item, ['*'])
+            Relation('item', dict(category_id=self.id), User, 'items', Item, ['*'])
         ]
 
 
@@ -89,7 +89,7 @@ class User(UserBase):
 
     def relations(self) -> list[Relation]:
         return [
-            Relation('category', dict(user_id=id), User, 'categories', Category, ['*'])
+            Relation('category', dict(user_id=self.id), User, 'categories', Category, ['*'])
         ]
 
 
