@@ -5,3 +5,4 @@ __pycache__/
 dist/
 src/apidevtools.egg-info/
 *.env
+*.jpg
