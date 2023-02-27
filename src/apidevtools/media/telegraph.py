@@ -1,5 +1,5 @@
-import aiohttp as _aiohttp
 import contextlib as _contextlib
+import aiohttp as _aiohttp
 import io
 
 

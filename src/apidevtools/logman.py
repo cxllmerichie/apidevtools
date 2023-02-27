@@ -1,6 +1,5 @@
 from loguru import logger as _logger
 from loguru._logger import Logger
-import os as _os
 import sys as _sys
 
 
@@ -11,9 +10,9 @@ class LoggerManager:
         _logger.configure(handlers=[{'sink': _sys.stderr, 'format': format}])
         self.__logger_format = format
 
-    def add(self, name: str, path: str, rotation: str = '20 MB', retention: str = '30 days') -> Logger:
-        _logger.add(_os.path.join(path, name), enqueue=True, backtrace=True, diagnose=True, format=self.__logger_format,
-                    rotation=rotation, retention=retention, filter=lambda r: name in r['extra'])
-        logger = _logger.bind(**{name: True})
-        setattr(self, name, logger)
+    def add(self, propname: str, filepath: str, rotation: str = '20 MB', retention: str = '30 days') -> Logger:
+        _logger.add(filepath, enqueue=True, backtrace=True, diagnose=True, format=self.__logger_format,
+                    rotation=rotation, retention=retention, filter=lambda r: propname in r['extra'])
+        logger = _logger.bind(**{propname: True})
+        setattr(self, propname, logger)
         return logger
