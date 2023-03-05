@@ -7,7 +7,9 @@ from .schema import Schema
 
 class Records:
     def __init__(self, records: list[MutableMapping], schema_t: SchemaType = dict[str, Any]):
-        if schema_t is dict:
+        # if schema_t is dict[str, Any]: returns False if "schema_t" has default value "dict[str, Any]"
+        # to fix: find out how to compare advanced typehinted types, like dict[str, Any]
+        if str(schema_t) == str(dict[str, Any]):
             record_t, unwrap = dict[str, Any], lambda record: dict(record)
         else:
             record_t, unwrap = Schema, lambda record: schema_t(**dict(record)).from_db()
