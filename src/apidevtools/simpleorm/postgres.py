@@ -46,6 +46,8 @@ class PostgreSQL:
         try:
             self.__connection = await self.__pool.acquire()
             return self.__connection
+        except _exceptions.InterfaceError:
+            self.logger.error('Attempting to create connection with already closed pool')
         except AttributeError:
             self.logger.error('Attempting to create connection with not acquired pool')
 
