@@ -5,9 +5,7 @@ from loguru._logger import Logger
 from typing import Any
 import loguru
 
-from .schema import Schema
-from .records import Records
-from .types import SchemaType, Record, Instance
+from .types import SchemaType, Record, Instance, Schema, Records
 
 
 class PostgreSQL:
@@ -28,7 +26,9 @@ class PostgreSQL:
 
     async def create_pool(self) -> bool:
         try:
-            self.__pool = await _create_pool(database=self.database, host=self.host, port=self.port, user=self.user, password=self.password)
+            self.__pool = await _create_pool(
+                database=self.database, host=self.host, port=self.port, user=self.user, password=self.password
+            )
         except OSError:
             self.logger.error('Pool creation failed')
         return self.__pool is not None
@@ -49,7 +49,7 @@ class PostgreSQL:
         except _exceptions.InterfaceError:
             self.logger.error('Attempting to create connection with already closed pool')
         except AttributeError:
-            self.logger.error('Attempting to create connection with not acquired pool')
+            self.logger.error('Attempting to create connection without acquired pool')
 
     async def __aexit__(self, exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
         try:
@@ -61,7 +61,8 @@ class PostgreSQL:
         async with self as connection:
             return await connection.execute(query, *args)
 
-    async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: SchemaType = dict, depth: int = 0) -> Records:
+    async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: SchemaType = dict, depth: int = 0)\
+            -> Records:
         async with self as connection:
             records = Records(await connection.fetch(query, *args), schema_t)
         if depth > 0 and schema_t is not dict:
@@ -85,17 +86,16 @@ class PostgreSQL:
         columns, values = str(tuple(instance.keys())).replace("'", '"'), instance.values()
         query, args = f'INSERT INTO "{tablename}" {columns} VALUES ({placeholders}) RETURNING *;', values
         async with self as connection:
-            records = await connection.fetch(query, *args)
-        return Records(records, schema_t).first()
+            return Records(await connection.fetch(query, *args), schema_t).first()
 
-    async def update(self, instance: Instance, where: dict[str, Any], schema_t: SchemaType = dict, tablename: str = None) -> Records:
+    async def update(self, instance: Instance, where: dict[str, Any], schema_t: SchemaType = dict, tablename: str = None)\
+            -> Records:
         instance, tablename = await self.__parse_parameters(instance, tablename)
         values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
         query, args = f'UPDATE "{tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values())
         async with self as connection:
-            records = await connection.fetch(query, *args)
-        return Records(records, schema_t)
+            return Records(await connection.fetch(query, *args), schema_t)
 
     async def delete(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Records:
         # Method successfully removes the instance from the database. Supposed to return the instance and all
@@ -117,12 +117,12 @@ class PostgreSQL:
                 records.records[index] = relation.ext_schema_t(**dict(record))
         query, args = f'DELETE FROM "{tablename}" WHERE {conditions} RETURNING *;', tuple(instance.values())
         async with self as connection:
-            records = await connection.fetch(query, *args)
-        # ISSUE 1 (continuation):
-        #   but returning another records
-        return Records(records, schema_t)
+            # ISSUE 1 (continuation):
+            #   but returning another records
+            return Records(await connection.fetch(query, *args), schema_t)
 
-    async def __parse_instance(self, instance: dict[str, Any], tablename: str) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    async def __parse_instance(self, instance: dict[str, Any], tablename: str)\
+            -> tuple[tuple[str, ...], tuple[str, ...]]:
         query, args = 'SELECT "column_name" FROM information_schema.columns WHERE "table_name" = $1;', (tablename,)
         async with self as connection:
             db_columns = [record['column_name'] for record in Records(await connection.fetch(query, *args)).all()]
@@ -135,7 +135,7 @@ class PostgreSQL:
 
     async def __parse_parameters(self, instance: Instance, tablename: str) -> tuple[Record, str]:
         if isinstance(instance, Schema):
-            tablename = instance.tablename
+            tablename = instance.__tablename__
             instance = dict(instance.into_db())
         if not tablename:
             raise AttributeError('Specify "tablename" if "instance" is a "dict" type, otherwise pass '

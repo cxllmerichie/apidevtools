@@ -93,7 +93,7 @@ class User(UserBase):
         ]
 
 
-DB_NAME = "web_telegram_backup"
+DB_NAME = "autoreply"
 DB_USER = "postgres"
 DB_PASS = "0FD1Vg44au{U@0<fn@=M"
 DB_HOST = "localhost"

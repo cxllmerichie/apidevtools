@@ -1,21 +1,22 @@
-from apidevtools.media import imgproc
-from asyncio import get_event_loop
+import asyncio
+
+from src.apidevtools.media import imgproc
 
 
 async def amain():
-    img = await imgproc.generate()
-    await imgproc.crop(img)
-    await imgproc.default()
+    img = imgproc.generate()
+    imgproc.crop(img)
+    imgproc.default()
 
     img = imgproc.Image(img.bytes)
-    img.bytesio
-    await img.url()
-    img.image
-    print(img.default_text)
+    print(img.bytesio)
+    print(await img.url())
+    print(img.image)
+    print(img.text)
     img = imgproc.convert(img)
     print(img)
 
 
 if __name__ == '__main__':
-    loop = get_event_loop()
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(amain())

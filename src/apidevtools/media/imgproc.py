@@ -6,6 +6,11 @@ import pathlib as _pathlib
 import os as _os
 
 
+# make the package entirely async
+# try to replace numpy with pure python
+# fix fonts
+
+
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
     """
     Create PIL.Image.Image from bytes or io.BytesIO.
@@ -40,13 +45,10 @@ class Image:
         self.image.save(output, 'PNG')
         return output
 
-    async def url(self, attempts: int = 5) -> str | None:
+    async def url(self) -> str | None:
         from . import telegraph
 
-        attempt = 1
-        while not (url := await telegraph.upload(self.bytesio)) and attempt <= attempts:
-            url, attempt = await telegraph.upload(self.bytesio), attempt + 1
-        return url
+        return await telegraph.upload(self.bytesio)
 
 
 class Font:
@@ -104,7 +106,7 @@ def crop(image: bytes | io.BytesIO | PIL.Image.Image | Image) -> Image:
     img = convert(image)
     size = min(img.size)
     alpha = PIL.Image.new('L', img.size, 0)
-    _ImageDraw.Draw(alpha).pieslice([0, 0, size, size], 0, 360, fill=255)
+    _ImageDraw.Draw(alpha).pieslice(((0, 0), (size, size)), 0, 360, fill=255)
     img = PIL.Image.fromarray(_np.dstack((_np.array(img), _np.array(alpha))))
     img = img.crop((0, 0, size, size))
     return Image(img)
