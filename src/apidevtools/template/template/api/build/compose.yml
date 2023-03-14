@@ -1,12 +1,12 @@
 version: '3.3'
 services:
   postgres:
-    container_name: 'template_api_container'
+    container_name: 'template_container'
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_DB: 'template_api_database'
+      POSTGRES_DB: 'template_database'
       POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: '0FD1Vg44au{U@0<fn@=M'
+      POSTGRES_PASSWORD: '8BY`QL<d736?:0r0]kUX5"Tn"uVWco'
     image: postgres
     restart: always
