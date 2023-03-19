@@ -1,4 +1,6 @@
-from src.apidevtools.simpleorm import Schema, Relation, PostgreSQL
+from loguru import logger
+
+from src.apidevtools.simpleorm import Schema, Relation, ORM, connector
 
 
 tables: str = '''
@@ -93,13 +95,16 @@ class User(UserBase):
         ]
 
 
-DB_NAME = "autoreply"
+DB_NAME = "telegram_autoreply_client"
 DB_USER = "postgres"
 DB_PASS = "0FD1Vg44au{U@0<fn@=M"
 DB_HOST = "localhost"
 DB_PORT = 5432
 
-db: PostgreSQL = PostgreSQL(database=DB_NAME, host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS)
+db: ORM = ORM(
+    connector=connector.PostgreSQL(database=DB_NAME, host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS),
+    logger=logger
+)
 
 
 async def startup():

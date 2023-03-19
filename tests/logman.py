@@ -1,4 +1,4 @@
-from apidevtools.logman import LoggerManager
+from src.apidevtools.logman import LoggerManager
 
 
 LM = LoggerManager()

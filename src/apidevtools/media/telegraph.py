@@ -16,7 +16,7 @@ async def upload(file: io.BytesIO, mime: str = 'image/png') -> str | None:
             async with session.post(url='https://telegra.ph/upload', data=data) as response:
                 sources = await response.json()
                 if not (isinstance(sources, dict) and sources.get('error')):
-                    return f"https://telegra.ph{(await response.json())[-1]['src']}"
+                    return f"https://telegra.ph{sources[-1]['src']}"
 
 
 async def download(url: str) -> bytes | None:

@@ -1,4 +1,4 @@
-from apidevtools.security import encryptor, hasher
+from src.apidevtools.security import encryptor, hasher
 
 
 key = '1234123412341234'

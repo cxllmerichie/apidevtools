@@ -93,5 +93,9 @@ class Records:
             if not isinstance(record, dict):
                 record = dict(record)
             return tuple([record[column] for column in columns])
-        self.records = sorted(self.records, key=columns if isinstance(columns, str) else keys, reverse=(direction.upper() == 'DESC'))
+        self.records = sorted(
+            self.records,
+            key=columns if isinstance(columns, str) else keys,
+            reverse=(direction.upper() == 'DESC')
+        )
         return self

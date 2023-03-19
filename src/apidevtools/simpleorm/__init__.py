@@ -1,2 +1,2 @@
-from .postgres import PostgreSQL
+from .orm import ORM
 from .types import Schema, Record, Relation

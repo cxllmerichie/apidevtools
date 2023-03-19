@@ -1,7 +1,8 @@
-from src.apidevtools.media.telegraph import upload, download
 from asyncio import get_event_loop
-from src.apidevtools.media.imgproc import default
 from io import BytesIO
+
+from src.apidevtools.media.imgproc import default
+from src.apidevtools.media.telegraph import upload, download
 
 
 if __name__ == '__main__':

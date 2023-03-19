@@ -1,4 +1,4 @@
-from apidevtools.simpleorm import Relation, Schema
+from src.apidevtools.simpleorm import Relation, Schema
 
 
 class KindaShema(Schema):
