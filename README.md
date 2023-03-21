@@ -1,5 +1,6 @@
 # ToDo:
 - add oraclesql/microsoftsql/mysql/mariadb/mongodb/elasticdb
+- mysql workaround `RETURNING *`
 ## Overview
 ## Documentation
 ## Installation
@@ -21,6 +22,7 @@ pip install aiodns ujson cchardet uvloop
         pip install pydantic loguru
         ```
         - connectors
+            - mysql ```pip install aiomysql```
             - postgresql ```pip install asyncpg```
             - sqlite ```pip install aiosqlite```
     - nosql

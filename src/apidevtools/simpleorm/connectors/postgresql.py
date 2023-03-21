@@ -1,4 +1,4 @@
-from asyncpg.pool import create_pool as _create_pool, Pool as _Pool
+import asyncpg as _asyncpg
 from loguru._logger import Logger
 from typing import Any, MutableMapping
 import loguru
@@ -18,28 +18,29 @@ class PostgreSQL(Connector):
         self.user: str = user
         self.password: str | None = password
 
-        self.pool: _Pool | None = None
-
         self.logger: Logger = logger
+        self.pool: _asyncpg.pool.Pool | None = None
+
+        super().__init__(None, None, None)
 
     async def create_pool(self) -> bool:
         try:
-            self.pool = await _create_pool(
+            self.pool = await _asyncpg.pool.create_pool(
                 database=self.database, host=self.host, port=self.port, user=self.user, password=self.password
             )
+            return True
         except OSError:
             self.logger.error('Pool creation failed')
             return False
-        return True
 
     async def close_pool(self) -> bool:
         try:
             await self.pool.expire_connections()
             await self.pool.close()
+            return True
         except AttributeError:
             self.logger.error(f'Attempting to close not acquired pool')
             return False
-        return True
 
     async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
         try:
@@ -49,7 +50,7 @@ class PostgreSQL(Connector):
             self.logger.error(error)
 
     async def columns(self, tablename: str) -> list[str]:
-        query, args = 'SELECT "column_name" FROM information_schema.columns WHERE "table_name" = $1;', (tablename,)
+        query, args = 'SELECT "column_name" FROM "information_schema"."columns" WHERE "table_name" = $1;', (tablename,)
         async with self.pool.acquire() as connection:
             return [dict(record)['column_name'] for record in await connection.fetch(query, *args)]
 
@@ -59,46 +60,41 @@ class PostgreSQL(Connector):
                 return await connection.fetch(query, *args)
         except Exception as error:
             self.logger.error(error)
-        return []
+            return []
 
-    async def _constructor__select_relation(
-            self, relation: Relation,
-            *args, **kwargs
+    async def _constructor__select_relations(
+            self, relation: Relation
     ) -> tuple[str, tuple[Any, ...]]:
         columns, values = ', '.join(relation.columns), tuple(relation.where.values())
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(relation.where.keys())])
         return f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', values
 
-    async def _constructor__select_instance(
+    async def _constructor__select_instances(
             self,
-            instance: dict[str, Any], tablename: str,
-            *args, **kwargs
+            instance: dict[str, Any], tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         return f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
 
     async def _constructor__insert_instance(
             self,
-            instance: dict[str, Any], tablename: str,
-            *args, **kwargs
+            instance: dict[str, Any], tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
         placeholders = ', '.join([f'${index + 1}' for index in range(len(instance.keys()))])
         columns, values = str(tuple(instance.keys())).replace("'", '"'), instance.values()
         return f'INSERT INTO "{tablename}" {columns} VALUES ({placeholders}) RETURNING *;', tuple(values)
 
-    async def _constructor__update_instance(
+    async def _constructor__update_instances(
             self,
-            instance: dict[str, Any], tablename: str, where: dict[str, Any],
-            *args, **kwargs
+            instance: dict[str, Any], tablename: str, where: dict[str, Any]
     ) -> tuple[str, tuple[Any, ...]]:
         values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
         return f'UPDATE "{tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values())
 
-    async def _constructor__delete_instance(
+    async def _constructor__delete_instances(
             self,
-            instance: dict[str, Any], tablename: str,
-            *args, **kwargs
+            instance: dict[str, Any], tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         return f'DELETE FROM "{tablename}" WHERE {conditions} RETURNING *;', tuple(instance.values())

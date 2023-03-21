@@ -1,13 +1,14 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, MutableMapping
 
 from ..types import Relation
 
 
-class Connector(ABC):
-    @abstractmethod
-    def __init__(self, database: str, host: str, port: int | str, user: str, password: str | None):
-        ...
+class Connector:
+    def __init__(self, placeholder: str | None = '%s', constraint_wrapper: str | None = '', value_wrapper: str | None = "'"):
+        self.placeholder: str | None = placeholder
+        self.constraint_wrapper: str | None = constraint_wrapper
+        self.value_wrapper: str | None = value_wrapper
 
     @abstractmethod
     async def create_pool(self) -> bool:
@@ -30,48 +31,53 @@ class Connector(ABC):
         ...
 
     @abstractmethod
-    async def _constructor__select_relation(
-            self, relation: Relation,
-            *, placeholder: str = '%s'
+    async def _constructor__select_relations(
+            self, relation: Relation
     ) -> tuple[str, tuple[Any, ...]]:
+        p, c, v = self.placeholder, self.constraint_wrapper, self.value_wrapper
+
         columns, values = ', '.join(relation.columns), tuple(relation.where.values())
-        conditions = ' AND '.join([f'"{key}" = {placeholder}' for key in relation.where.keys()])
-        return f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', values
+        conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key in relation.where.keys()])
+        return f'SELECT {columns} FROM {relation.tablename} WHERE {conditions};', values
 
     @abstractmethod
-    async def _constructor__select_instance(
+    async def _constructor__select_instances(
             self,
-            instance: dict, tablename: str,
-            *, placeholder: str = '%s'
+            instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
-        conditions = ' AND '.join([f'"{key}" = {placeholder}' for key in instance.keys()])
-        return f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
+        p, c, v = self.placeholder, self.constraint_wrapper, self.value_wrapper
+
+        conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key in instance.keys()])
+        return f'SELECT * FROM {c}{tablename}{c} WHERE {conditions};', tuple(instance.values())
 
     @abstractmethod
     async def _constructor__insert_instance(
             self,
-            instance: dict, tablename: str,
-            *, placeholder: str = '%s'
+            instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
-        placeholders = ', '.join([placeholder for _ in range(len(instance.keys()))])
-        columns, values = str(tuple(instance.keys())).replace("'", '"'), tuple(instance.values())
-        return f'INSERT INTO "{tablename}" {columns} VALUES ({placeholders}) RETURNING *;', values
+        p, c, v = self.placeholder, self.constraint_wrapper, self.value_wrapper
+
+        placeholders = ', '.join([p for _ in range(len(instance.keys()))])
+        columns, values = str(tuple(instance.keys())).replace("'", v), tuple(instance.values())
+        return f'INSERT INTO {c}{tablename}{c} {columns} VALUES ({placeholders}) RETURNING *;', values
 
     @abstractmethod
-    async def _constructor__update_instance(
+    async def _constructor__update_instances(
             self,
-            instance: dict, tablename: str, where: dict[str, Any],
-            *, placeholder: str = '%s'
+            instance: dict, tablename: str, where: dict[str, Any]
     ) -> tuple[str, tuple[Any, ...]]:
-        values = ', '.join([f'{key} = {placeholder}' for key in instance.keys()])
-        conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
-        return f'UPDATE "{tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values())
+        p, c, v = self.placeholder, self.constraint_wrapper, self.value_wrapper
+
+        values = ', '.join([f'{c}{key}{c} = {p}' for key in instance.keys()])
+        conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key in where.keys()])
+        return f'UPDATE {c}{tablename}{c} SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values()) + tuple(where.values())
 
     @abstractmethod
-    async def _constructor__delete_instance(
+    async def _constructor__delete_instances(
             self,
-            instance: dict, tablename: str,
-            *, placeholder: str = '%s'
+            instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
-        conditions = ' AND '.join([f'"{key}" = {placeholder}' for key in instance.keys()])
-        return f'DELETE FROM "{tablename}" WHERE {conditions} RETURNING *;', tuple(instance.values())
+        p, c, v = self.placeholder, self.constraint_wrapper, self.value_wrapper
+
+        conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key in instance.keys()])
+        return f'DELETE FROM {c}{tablename}{c} WHERE {conditions} RETURNING *;', tuple(instance.values())

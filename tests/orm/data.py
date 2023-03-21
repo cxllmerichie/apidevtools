@@ -1,10 +1,10 @@
 from pydantic import Field
 
-from src.apidevtools.simpleorm import Schema, Relation
+from src.apidevtools.simpleorm import Schema, Relation, ORM
 
 
 class ItemBase(Schema):
-    __tablename__ = 'item'
+    __tablename__ = 'simpleorm_item'
 
     title: str
     description: str
@@ -25,7 +25,7 @@ class Item(ItemCreateCrud):
 
 
 class CategoryBase(Schema):
-    __tablename__ = 'category'
+    __tablename__ = 'simpleorm_category'
 
     title: str
     description: str | None = None
@@ -47,12 +47,12 @@ class Category(CategoryBase):
 
     def relations(self) -> list[Relation]:
         return [
-            Relation('item', dict(category_id=self.id), Category, 'items', Item, ['*'])
+            Relation('simpleorm_item', dict(category_id=self.id), Category, 'items', Item, ['*'])
         ]
 
 
 class UserBase(Schema):
-    __tablename__ = 'user'
+    __tablename__ = 'simpleorm_user'
 
     email: str = Field()
 
@@ -68,7 +68,7 @@ class User(UserBase):
 
     def relations(self) -> list[Relation]:
         return [
-            Relation('category', dict(user_id=self.id), User, 'categories', Category, ['*'])
+            Relation('simpleorm_category', dict(user_id=self.id), User, 'categories', Category, ['*'])
         ]
 
 
@@ -81,21 +81,29 @@ async def shutdown(db):
     assert await db.close_pool()
 
 
-async def amain(db, tables):
+async def amain(db: ORM, tables):
     await startup(db, tables)
 
     instance = UserCreate(email=f'string', password='string')
     db_user = await db.insert(instance, User)
+    print(db_user)
 
     category = CategoryCreateCrud(title='title', description='description', user_id=db_user.id)
     db_category = await db.insert(category, Category)
+    print(db_category)
 
     item = ItemCreateCrud(title='title', description='description', category_id=db_category.id)
     db_item = await db.insert(item, Item)
+    print(db_item)
 
-    db_user = (await db.select('SELECT * FROM "user";', schema_t=User, depth=2)).first()
+    db_user = (await db.select('SELECT * FROM simpleorm_user;', schema_t=User, depth=1)).first()
+    print(db_user)
 
-    db_user = (await db.delete(db_user, User, depth=2)).first()
+    db_user.email = 'newemail'
+    db_user = (await db.update(db_user, dict(id=db_user.id), User)).first()
+    print(db_user)
+
+    db_user = (await db.delete(db_user, User, 'simpleorm_user', depth=2)).first()
     print(db_user)
 
     await shutdown(db)

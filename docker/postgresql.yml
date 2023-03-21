@@ -1,6 +1,7 @@
 version: '3.3'
 services:
   postgres:
+    image: postgres
     container_name: 'simpleorm_postgresql'
     ports:
       - '5432:5432'
@@ -8,5 +9,4 @@ services:
       POSTGRES_DB: 'simpleorm_postgresql'
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: "h1=Q3mU3&O92v'<otR-V"
-    image: postgres
     restart: always

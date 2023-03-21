@@ -40,7 +40,7 @@ class ORM:
         if depth > 0 and schema_t is not dict:
             for index, record in enumerate(records.all()):
                 for relation in record.relations():
-                    query, args = await self.connector._constructor__select_relation(relation)
+                    query, args = await self.connector._constructor__select_relations(relation)
                     instances = (await self.select(query, args, relation.rel_schema_t, depth=depth - 1)).all()
                     if isinstance(record, dict):
                         record[relation.fieldname] = instances
@@ -63,7 +63,7 @@ class ORM:
             instance: Instance, where: dict[str, Any], schema_t: SchemaType = dict[str, Any], tablename: str = None
     ) -> Records:
         instance, tablename = await self.__parse_parameters(instance, tablename)
-        query, args = await self.connector._constructor__update_instance(instance, tablename, where)
+        query, args = await self.connector._constructor__update_instances(instance, tablename, where)
         return Records(await self.connector.fetchall(query, args), schema_t)
 
     async def delete(
@@ -72,20 +72,19 @@ class ORM:
             *, depth: int = 0
     ) -> Records:
         instance, tablename = await self.__parse_parameters(instance, tablename)
-        query, args = await self.connector._constructor__select_instance(instance, tablename)
+        query, args = await self.connector._constructor__select_instances(instance, tablename)
         records = await self.select(query, args, schema_t)
         for index, record in enumerate(records.all()) if schema_t is not dict else ():
             for relation in record.relations():
-                instances = (await self.delete(dict(**relation.where), relation.rel_schema_t, relation.tablename, depth=depth - 1)).all()
-                if not (depth > 0 and schema_t is not dict):
-                    continue
-                if isinstance(record, dict):
-                    record[relation.fieldname] = instances
-                elif isinstance(record, Schema):
-                    record = relation.ext_schema_t(**dict(record))
-                    setattr(record, relation.fieldname, instances)
-                records._records[index] = relation.ext_schema_t(**dict(record))
-        await self.connector.fetchall(*(await self.connector._constructor__delete_instance(instance, tablename)))
+                instances = (await self.delete(relation.where, relation.rel_schema_t, relation.tablename, depth=depth - 1)).all()
+                if depth > 0 and schema_t is not dict:
+                    if isinstance(record, dict):
+                        record[relation.fieldname] = instances
+                    elif isinstance(record, Schema):
+                        record = relation.ext_schema_t(**dict(record))
+                        setattr(record, relation.fieldname, instances)
+                    records._records[index] = relation.ext_schema_t(**dict(record))
+        await self.connector.execute(*(await self.connector._constructor__delete_instances(instance, tablename)))
         return records
 
     async def __parse_instance(self, instance: dict[str, Any], tablename: str)\
