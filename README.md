@@ -1,6 +1,3 @@
-# ToDo:
-- add oraclesql/microsoftsql/mysql/mariadb/mongodb/elasticdb
-- mysql workaround `RETURNING *`
 ## Overview
 ## Documentation
 ## Installation
