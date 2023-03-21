@@ -1,10 +1,18 @@
 from pydantic import BaseModel
 from abc import ABC
-import datetime
 from abc import abstractmethod as _abstractmethod
 from typing import Any
 
-from .relation import Relation
+
+class Relation:
+    def __init__(self, tablename: str, where: dict[str, Any], ext_schema_t: 'SchemaType', fieldname: str,
+                 rel_schema_t: 'SchemaType' = dict[str, Any], columns: list[str] = None):
+        self.tablename: str = tablename
+        self.where: dict[str, Any] = where
+        self.ext_schema_t: 'SchemaType' = ext_schema_t
+        self.fieldname: str = fieldname
+        self.rel_schema_t: 'SchemaType' = rel_schema_t
+        self.columns: list[str] = columns if columns else ['*']
 
 
 class Schema(BaseModel, ABC):
@@ -19,14 +27,6 @@ class Schema(BaseModel, ABC):
 
     def relations(self) -> list[Relation]:
         return []
-
-    def serializable(self, types: tuple[type, ...] = (datetime.datetime, datetime.date, datetime.time)) -> dict[str: Any]:
-        """
-        Returns python dictionary of values which will not trigger FastAPI error related to not serializable objects
-        :param types:
-        :return:
-        """
-        return {key: str(value) if isinstance(value, types) else value for key, value in dict(self).items()}
 
     def into_db(self) -> 'Schema':
         return self

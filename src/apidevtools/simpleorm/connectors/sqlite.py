@@ -65,40 +65,35 @@ class SQLite(Connector):
         return []
 
     async def _constructor__select_relation(
-            self, relation: Relation
+            self, relation: Relation,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
-        columns, values = ', '.join(relation.columns), tuple(relation.where.values())
-        conditions = ' AND '.join([f'"{key}" = ?' for key in relation.where.keys()])
-        return f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', values
+        return await super()._constructor__select_relation(relation, placeholder='?')
 
     async def _constructor__select_instance(
             self,
-            instance: dict, tablename: str
+            instance: dict[str, Any], tablename: str,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
-        conditions = ' AND '.join([f'"{key}" = ?' for key in instance.keys()])
-        return f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
+        return await super()._constructor__select_instance(instance, tablename, placeholder='?')
 
     async def _constructor__insert_instance(
             self,
-            instance: dict, tablename: str
+            instance: dict[str, Any], tablename: str,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
-        # merge values = instance.values() and args = tuple(values)
-        # and replace all values in the query with "?" passing values as parameters
-        placeholders = ', '.join(['?' for _ in range(len(instance.keys()))])
-        columns, values = str(tuple(instance.keys())).replace("'", '"'), instance.values()
-        return f'INSERT INTO "{tablename}" {columns} VALUES ({placeholders}) RETURNING *;', tuple(values)
+        return await super()._constructor__insert_instance(instance, tablename, placeholder='?')
 
     async def _constructor__update_instance(
             self,
-            instance: dict, tablename: str, where: dict[str, Any]
+            instance: dict[str, Any], tablename: str, where: dict[str, Any],
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
-        values = ', '.join([f'{key} = ?' for key in instance.keys()])
-        conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
-        return f'UPDATE "{tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values())
+        return await super()._constructor__update_instance(instance, tablename, where, placeholder='?')
 
     async def _constructor__delete_instance(
             self,
-            instance: dict, tablename: str
+            instance: dict[str, Any], tablename: str,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
-        conditions = ' AND '.join([f'"{key}" = ?' for key in instance.keys()])
-        return f'DELETE FROM "{tablename}" WHERE {conditions} RETURNING *;', tuple(instance.values())
+        return await super()._constructor__delete_instance(instance, tablename, placeholder='?')

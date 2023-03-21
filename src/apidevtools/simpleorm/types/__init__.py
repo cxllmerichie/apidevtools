@@ -1,3 +1,2 @@
-from .schema import Schema, SchemaType
+from .schema import Schema, SchemaType, Relation
 from .records import Records, Record
-from .relation import Relation

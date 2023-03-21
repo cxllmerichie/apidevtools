@@ -55,7 +55,8 @@ class PostgreSQL(Connector):
             return await connection.fetch(query, *args)
 
     async def _constructor__select_relation(
-            self, relation: Relation
+            self, relation: Relation,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
         columns, values = ', '.join(relation.columns), tuple(relation.where.values())
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(relation.where.keys())])
@@ -63,14 +64,16 @@ class PostgreSQL(Connector):
 
     async def _constructor__select_instance(
             self,
-            instance: dict, tablename: str
+            instance: dict[str, Any], tablename: str,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         return f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
 
     async def _constructor__insert_instance(
             self,
-            instance: dict, tablename: str
+            instance: dict[str, Any], tablename: str,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
         placeholders = ', '.join([f'${index + 1}' for index in range(len(instance.keys()))])
         columns, values = str(tuple(instance.keys())).replace("'", '"'), instance.values()
@@ -78,7 +81,8 @@ class PostgreSQL(Connector):
 
     async def _constructor__update_instance(
             self,
-            instance: dict, tablename: str, where: dict[str, Any]
+            instance: dict[str, Any], tablename: str, where: dict[str, Any],
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
         values = ', '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
@@ -86,7 +90,8 @@ class PostgreSQL(Connector):
 
     async def _constructor__delete_instance(
             self,
-            instance: dict, tablename: str
+            instance: dict[str, Any], tablename: str,
+            *args, **kwargs
     ) -> tuple[str, tuple[Any, ...]]:
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(instance.keys())])
         return f'DELETE FROM "{tablename}" WHERE {conditions} RETURNING *;', tuple(instance.values())

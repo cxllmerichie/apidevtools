@@ -1,18 +1,18 @@
 import asyncio
+from loguru import logger
 
-from src.apidevtools.simpleorm.types import Schema, Relation
 from src.apidevtools.simpleorm.connectors.sqlite import SQLite
+from src.apidevtools.simpleorm import Schema, Relation, ORM
 
 
-user: str = '''
+tables: str = '''
 CREATE TABLE IF NOT EXISTS "user" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
 
     "email" TEXT NOT NULL UNIQUE,
     "password" TEXT NOT NULL
-);'''
+);
 
-category = '''
 CREATE TABLE IF NOT EXISTS "category" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -21,9 +21,8 @@ CREATE TABLE IF NOT EXISTS "category" (
 
     "user_id" INT NOT NULL,
     CONSTRAINT fk_user FOREIGN KEY("user_id") REFERENCES "user" ("id")
-);'''
+);
 
-item = '''
 CREATE TABLE IF NOT EXISTS "item" (
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
 
@@ -97,10 +96,6 @@ class User(UserBase):
             Relation('category', dict(user_id=self.id), User, 'categories', Category, ['*'])
         ]
 
-from loguru import logger
-
-from src.apidevtools.simpleorm import Schema, Relation, ORM
-
 
 DB_NAME = 'sqlite.sqlite'
 
@@ -112,9 +107,7 @@ db: ORM = ORM(
 
 async def startup():
     assert await db.create_pool()
-    print(await db.execute(user))
-    await db.execute(category)
-    await db.execute(item)
+    print(await db.execute(tables))
 
 
 async def shutdown():
@@ -129,7 +122,7 @@ async def amain():
         db_user = await db.insert(instance, User)
         print(db_user)
 
-    db_users = await db.select('SELECT * FROM "user";', schema_t=User)
+    db_users = await db.select('SELECT * FROM "user";')
     print(db_users.order_by(['id', 'email']).all())
     print(db_users.first())
     for db_user in db_users:

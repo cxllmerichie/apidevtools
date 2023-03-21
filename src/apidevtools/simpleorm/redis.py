@@ -10,7 +10,7 @@ class Redis:
                  logger: Logger = loguru.logger):
         self.host: str = host
         self.port: str | int = port
-        self.user: str = user
+        self.user: str | None = user
         self.password: str | None = password
 
         self.logger: Logger = logger
@@ -36,10 +36,7 @@ class Redis:
         return True
 
     def __getitem__(self, key):
-        async def convert():
-            value: bytes = await self.pool.get(key)
-            return _ast.literal_eval(value.decode())
-        return convert()
+        return _ast.literal_eval((await self.pool.get(key)).decode())
 
     async def set(self, key: Any, value: Any):
         return await self.pool.set(key, value)
