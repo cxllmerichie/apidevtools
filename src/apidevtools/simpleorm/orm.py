@@ -40,7 +40,7 @@ class ORM:
         if depth > 0 and schema_t is not dict:
             for index, record in enumerate(records.all()):
                 for relation in record.relations():
-                    query, args = self.connector._constructor__select_relation(relation)
+                    query, args = await self.connector._constructor__select_relation(relation)
                     instances = (await self.select(query, args, relation.rel_schema_t, depth=depth - 1)).all()
                     if isinstance(record, dict):
                         record[relation.fieldname] = instances
@@ -71,26 +71,22 @@ class ORM:
             instance: Instance, schema_t: SchemaType = dict[str, Any], tablename: str = None,
             *, depth: int = 0
     ) -> Records:
-        # Method successfully removes the instance from the database. Supposed to return the instance and all
-        # related to it instances (children relations), but returns only the instance itself, because of the issue below
         instance, tablename = await self.__parse_parameters(instance, tablename)
-        query, args = self.connector._constructor__select_instance(instance, tablename)
-        # ISSUE 1:
-        #   attaching removed relational children to this "records"
+        query, args = await self.connector._constructor__select_instance(instance, tablename)
         records = await self.select(query, args, schema_t)
         for index, record in enumerate(records.all()) if schema_t is not dict else ():
             for relation in record.relations():
-                instances = (await self.delete(dict(**relation.where), relation.rel_schema_t, relation.tablename)).all()
+                instances = (await self.delete(dict(**relation.where), relation.rel_schema_t, relation.tablename, depth=depth - 1)).all()
+                if not (depth > 0 and schema_t is not dict):
+                    continue
                 if isinstance(record, dict):
                     record[relation.fieldname] = instances
                 elif isinstance(record, Schema):
                     record = relation.ext_schema_t(**dict(record))
                     setattr(record, relation.fieldname, instances)
                 records._records[index] = relation.ext_schema_t(**dict(record))
-        query, args = await self.connector._constructor__delete_instance(instance, tablename)
-        # ISSUE 1 (continuation):
-        #   but returning another records
-        return Records(await self.connector.fetchall(query, args), schema_t)
+        await self.connector.fetchall(*(await self.connector._constructor__delete_instance(instance, tablename)))
+        return records
 
     async def __parse_instance(self, instance: dict[str, Any], tablename: str)\
             -> tuple[tuple[str, ...], tuple[str, ...]]:

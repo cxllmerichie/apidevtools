@@ -41,18 +41,25 @@ class PostgreSQL(Connector):
             return False
         return True
 
-    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> str:
-        async with self.pool.acquire() as connection:
-            return await connection.execute(query, *args)
+    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
+        try:
+            async with self.pool.acquire() as connection:
+                return await connection.execute(query, *args)
+        except Exception as error:
+            self.logger.error(error)
 
     async def columns(self, tablename: str) -> list[str]:
         query, args = 'SELECT "column_name" FROM information_schema.columns WHERE "table_name" = $1;', (tablename,)
         async with self.pool.acquire() as connection:
-            return [dict(record)['column_name'] for record in await connection.fetch(query, *args).all()]
+            return [dict(record)['column_name'] for record in await connection.fetch(query, *args)]
 
     async def fetchall(self, query: str, args: tuple[Any, ...] = ()) -> list[MutableMapping]:
-        async with self.pool.acquire() as connection:
-            return await connection.fetch(query, *args)
+        try:
+            async with self.pool.acquire() as connection:
+                return await connection.fetch(query, *args)
+        except Exception as error:
+            self.logger.error(error)
+        return []
 
     async def _constructor__select_relation(
             self, relation: Relation,

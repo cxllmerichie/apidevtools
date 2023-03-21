@@ -46,13 +46,9 @@ class SQLite(Connector):
             self.logger.error(error)
 
     async def columns(self, tablename: str) -> list[str]:
-        try:
-            cursor: aiosqlite.Cursor = await self.pool.execute(f'SELECT * FROM {tablename}')
-            await self.pool.commit()
-            return list(map(lambda x: x[0], cursor.description))
-        except Exception as error:
-            self.logger.error(error)
-        return []
+        cursor: aiosqlite.Cursor = await self.pool.execute(f'SELECT * FROM {tablename}')
+        await self.pool.commit()
+        return list(map(lambda x: x[0], cursor.description))
 
     async def fetchall(self, query: str, args: tuple[Any, ...] = ()) -> list[MutableMapping]:
         try:

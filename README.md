@@ -1,7 +1,5 @@
 # ToDo:
-- add pydantic.field support
-- fix orm.delete to return deleted instances according to `depth`
-- add oraclesql/microsoftsql/mysql/mongodb/elasticdb
+- add oraclesql/microsoftsql/mysql/mariadb/mongodb/elasticdb
 ## Overview
 ## Documentation
 ## Installation
