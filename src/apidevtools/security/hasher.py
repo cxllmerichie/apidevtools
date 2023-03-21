@@ -1,9 +1,8 @@
 from contextlib import suppress as _suppress
 from argon2 import PasswordHasher as _PasswordHasher
-from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHash
+from argon2 import exceptions as _exceptions
 
 
-error: type[Exception] = VerifyMismatchError
 __hasher: _PasswordHasher = _PasswordHasher()
 
 
@@ -23,5 +22,5 @@ def cmp(pw_hash: str, password: str) -> bool:
     :param password: plain password string
     :return: True if password matches, False otherwise
     """
-    with _suppress(VerifyMismatchError, VerificationError, InvalidHash):
+    with _suppress(_exceptions.VerifyMismatchError, _exceptions.VerificationError, _exceptions.InvalidHash):
         return __hasher.verify(hash=pw_hash, password=password) is True

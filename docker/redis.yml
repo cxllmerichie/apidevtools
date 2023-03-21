@@ -1,0 +1,9 @@
+version: '3.3'
+services:
+  redis:
+    container_name: 'redis'
+    ports:
+      - '6379:6379'
+    image: redis
+    command: redis-server --appendonly yes --requirepass "h1=Q3mU3&O92v'<otR-V"
+    restart: always

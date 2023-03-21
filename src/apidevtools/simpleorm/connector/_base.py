@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, MutableMapping
 
 
-class Connector(ABC):
+class SQLConnector(ABC):
     @abstractmethod
     def __init__(self, database: str, host: str, port: int | str, user: str, password: str | None):
         ...
@@ -13,14 +13,6 @@ class Connector(ABC):
 
     @abstractmethod
     async def close_pool(self) -> bool:
-        ...
-
-    @abstractmethod
-    async def __aenter__(self) -> 'Connection':
-        ...
-
-    @abstractmethod
-    async def __aexit__(self, exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
         ...
 
     @abstractmethod
@@ -40,17 +32,17 @@ class Connector(ABC):
         ...
 
     @abstractmethod
-    async def constructor__select_identity(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def constructor__select_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...
 
     @abstractmethod
-    async def constructor__insert(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def constructor__insert_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...
 
     @abstractmethod
-    async def constructor__update(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def constructor__update_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...
 
     @abstractmethod
-    async def constructor__delete(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def constructor__delete_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...

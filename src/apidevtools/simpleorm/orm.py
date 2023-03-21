@@ -2,13 +2,16 @@ from loguru._logger import Logger
 from typing import Any
 import loguru
 
-from .types import SchemaType, Record, Instance, Schema, Records
-from .connector.base import Connector
+from .types import SchemaType, Record, Schema, Records
+from .connector._base import SQLConnector
+
+
+Instance = dict[str, Any] | Schema
 
 
 class ORM:
-    def __init__(self, connector: Connector, logger: Logger = loguru.logger):
-        self.connector: Connector = connector
+    def __init__(self, connector: SQLConnector, logger: Logger = loguru.logger):
+        self.connector: SQLConnector = connector
         self.logger: Logger = logger
 
     async def create_pool(self) -> bool:
@@ -26,12 +29,11 @@ class ORM:
             return False
 
     async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
-        return await self.connector.execute(query, *args)
+        return await self.connector.execute(query, args)
 
     async def select(self, query: str, args: tuple[Any, ...] = (), schema_t: SchemaType = dict, depth: int = 0)\
             -> Records:
-        async with self as connection:
-            records = Records(await connection.fetch(query, *args), schema_t)
+        records = Records(await self.connector.fetchall(query, args), schema_t)
         if depth > 0 and schema_t is not dict:
             for index, record in enumerate(records.all()):
                 for relation in record.relations():
@@ -47,20 +49,20 @@ class ORM:
 
     async def insert(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Record:
         instance, tablename = await self.__parse_parameters(instance, tablename)
-        query, args = await self.connector.constructor__insert(instance, tablename)
+        query, args = await self.connector.constructor__insert_instance(instance, tablename)
         return Records(await self.connector.fetchall(query, args), schema_t).first()
 
     async def update(self, instance: Instance, where: dict[str, Any], schema_t: SchemaType = dict, tablename: str = None)\
             -> Records:
         instance, tablename = await self.__parse_parameters(instance, tablename)
-        query, args = await self.connector.constructor__update(instance, tablename, where)
+        query, args = await self.connector.constructor__update_instance(instance, tablename, where)
         return Records(await self.connector.fetchall(query, args), schema_t)
 
     async def delete(self, instance: Instance, schema_t: SchemaType = dict, tablename: str = None) -> Records:
         # Method successfully removes the instance from the database. Supposed to return the instance and all
         # related to it instances (children relations), but returns only the instance itself, because of the issue below
         instance, tablename = await self.__parse_parameters(instance, tablename)
-        query, args = self.connector.constructor__select_identity(instance, tablename)
+        query, args = self.connector.constructor__select_instance(instance, tablename)
         # ISSUE 1:
         #   attaching removed relational children to this "records"
         records = await self.select(query, args, schema_t)
@@ -73,10 +75,10 @@ class ORM:
                     record = relation.ext_schema_t(**dict(record))
                     setattr(record, relation.fieldname, instances)
                 records.records[index] = relation.ext_schema_t(**dict(record))
-        query, args = await self.connector.constructor__delete(instance, tablename)
+        query, args = await self.connector.constructor__delete_instance(instance, tablename)
         # ISSUE 1 (continuation):
         #   but returning another records
-        return Records(await self.connector.fetchall(query, *args), schema_t)
+        return Records(await self.connector.fetchall(query, args), schema_t)
 
     async def __parse_instance(self, instance: dict[str, Any], tablename: str)\
             -> tuple[tuple[str, ...], tuple[str, ...]]:

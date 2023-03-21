@@ -1,6 +1,7 @@
 from loguru import logger
 
-from src.apidevtools.simpleorm import Schema, Relation, ORM, connector
+from src.apidevtools.simpleorm import Schema, Relation, ORM
+from src.apidevtools.simpleorm.connector.postgresql import PostgreSQL
 
 
 tables: str = '''
@@ -95,14 +96,14 @@ class User(UserBase):
         ]
 
 
-DB_NAME = "telegram_autoreply_client"
+DB_NAME = "simpleorm_postgresql"
 DB_USER = "postgres"
 DB_PASS = "0FD1Vg44au{U@0<fn@=M"
 DB_HOST = "localhost"
 DB_PORT = 5432
 
 db: ORM = ORM(
-    connector=connector.PostgreSQL(database=DB_NAME, host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS),
+    connector=PostgreSQL(database=DB_NAME, host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS),
     logger=logger
 )
 

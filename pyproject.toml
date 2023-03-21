@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apidevtools"
-version = "2.0.9"
+version = "2.1.0"
 authors = [
     { name="cxllmerichie", email="cxllmerichie@gmail.com" },
 ]
@@ -37,7 +37,7 @@ classifiers = [
 ]
 dependencies=[
 #    simpleorm
-    "asyncpg~=0.27.0",
+#    "asyncpg~=0.27.0",
     "pydantic~=1.10.4",
     "loguru~=0.6.0",
 
@@ -49,11 +49,11 @@ dependencies=[
 #    "aiohttp~=3.8.3",
 
 #   security
-    "argon2-cffi~=21.3.0",
+#    "argon2-cffi~=21.3.0",
 #    "pycryptodome~=3.17",
 
 #   speedups
-    "ujson~=5.7.0",
+#    "ujson~=5.7.0",
 #    "aiodns~=3.0.0",
     #"cchardet~=2.1.7",
     #"uvloop~=0.17.0"
