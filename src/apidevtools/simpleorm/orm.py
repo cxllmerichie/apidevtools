@@ -76,7 +76,7 @@ class ORM:
         records = await self.select(query, args, schema_t)
         for index, record in enumerate(records.all()) if schema_t is not dict else ():
             for relation in record.relations():
-                instances = (await self.delete(relation.where, relation.rel_schema_t, relation.tablename, depth=depth - 1)).all()
+                instances = (await self.delete(relation.where, relation.rel_schema_t, relation.rel_schema_t.__tablename__, depth=depth - 1)).all()
                 if depth > 0 and schema_t is not dict:
                     if isinstance(record, dict):
                         record[relation.fieldname] = instances

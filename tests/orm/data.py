@@ -1,4 +1,5 @@
 from pydantic import Field
+from typing import Any
 
 from src.apidevtools.simpleorm import Schema, Relation, ORM
 
@@ -47,7 +48,7 @@ class Category(CategoryBase):
 
     def relations(self) -> list[Relation]:
         return [
-            Relation('simpleorm_item', dict(category_id=self.id), Category, 'items', Item, ['*'])
+            Relation(Category, 'items', Item, dict(category_id=self.id))
         ]
 
 
@@ -68,7 +69,7 @@ class User(UserBase):
 
     def relations(self) -> list[Relation]:
         return [
-            Relation('simpleorm_category', dict(user_id=self.id), User, 'categories', Category, ['*'])
+            Relation(User, 'categories', Category, dict(user_id=self.id))
         ]
 
 
@@ -103,7 +104,7 @@ async def amain(db: ORM, tables):
     db_user = (await db.update(db_user, dict(id=db_user.id), User)).first()
     print(db_user)
 
-    db_user = (await db.delete(db_user, User, 'simpleorm_user', depth=2)).first()
+    db_user = (await db.delete(db_user, User, depth=2)).first()
     print(db_user)
 
     await shutdown(db)

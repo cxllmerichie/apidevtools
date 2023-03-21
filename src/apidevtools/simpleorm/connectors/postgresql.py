@@ -65,9 +65,8 @@ class PostgreSQL(Connector):
     async def _constructor__select_relations(
             self, relation: Relation
     ) -> tuple[str, tuple[Any, ...]]:
-        columns, values = ', '.join(relation.columns), tuple(relation.where.values())
         conditions = ' AND '.join([f'"{key}" = ${index + 1}' for index, key in enumerate(relation.where.keys())])
-        return f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', values
+        return f'SELECT * FROM "{relation.rel_schema_t.__tablename__}" WHERE {conditions};', tuple(relation.where.values())
 
     async def _constructor__select_instances(
             self,

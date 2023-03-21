@@ -36,9 +36,8 @@ class Connector:
     ) -> tuple[str, tuple[Any, ...]]:
         p, c, v = self.placeholder, self.constraint_wrapper, self.value_wrapper
 
-        columns, values = ', '.join(relation.columns), tuple(relation.where.values())
         conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key in relation.where.keys()])
-        return f'SELECT {columns} FROM {relation.tablename} WHERE {conditions};', values
+        return f'SELECT * FROM {c}{relation.rel_schema_t.__tablename__}{c} WHERE {conditions};', tuple(relation.where.values())
 
     @abstractmethod
     async def _constructor__select_instances(
@@ -70,7 +69,7 @@ class Connector:
 
         values = ', '.join([f'{c}{key}{c} = {p}' for key in instance.keys()])
         conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key in where.keys()])
-        return f'UPDATE {c}{tablename}{c} SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values()) + tuple(where.values())
+        return f'UPDATE {c}{tablename}{c} SET {values} WHERE {conditions} RETURNING *;', (*instance.values(), *where.values())
 
     @abstractmethod
     async def _constructor__delete_instances(

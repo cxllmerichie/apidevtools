@@ -24,12 +24,9 @@ class MySQL(Connector):
         super().__init__(placeholder='%s', constraint_wrapper='`', value_wrapper="'")
 
     async def create_pool(self) -> bool:
-        from pymysql.constants.CLIENT import MULTI_STATEMENTS
-
         try:
-            self.pool = self.pool = await _aiomysql.create_pool(
-                host=self.host, port=self.port, user=self.user, password=self.password, db=self.database,
-                client_flag=MULTI_STATEMENTS,
+            self.pool = await _aiomysql.create_pool(
+                db=self.database, host=self.host, port=self.port, user=self.user, password=self.password
             )
             return True
         except Exception as error:

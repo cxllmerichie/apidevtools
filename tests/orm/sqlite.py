@@ -41,8 +41,8 @@ if __name__ == '__main__':
     DB_NAME = 'simpleorm_sqlite.sqlite'
 
     db: ORM = ORM(
-        # connector=SQLite(database=DB_NAME),
-        connector=SQLite(),
+        connector=SQLite(database=DB_NAME),
+        # connector=SQLite(),
         logger=logger
     )
 
