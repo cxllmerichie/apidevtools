@@ -68,20 +68,22 @@ class SQLite(Connector):
             self, relation: Relation
     ) -> tuple[str, tuple[Any, ...]]:
         columns, values = ', '.join(relation.columns), tuple(relation.where.values())
-        conditions = ' AND '.join([f'{key} = ?' for key in relation.where.keys()])
+        conditions = ' AND '.join([f'"{key}" = ?' for key in relation.where.keys()])
         return f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', values
 
     async def _constructor__select_instance(
             self,
             instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
-        conditions = ' AND '.join([f'{key} = ?' for key in instance.keys()])
+        conditions = ' AND '.join([f'"{key}" = ?' for key in instance.keys()])
         return f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
 
     async def _constructor__insert_instance(
             self,
             instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
+        # merge values = instance.values() and args = tuple(values)
+        # and replace all values in the query with "?" passing values as parameters
         placeholders = ', '.join(['?' for _ in range(len(instance.keys()))])
         columns, values = str(tuple(instance.keys())).replace("'", '"'), instance.values()
         return f'INSERT INTO "{tablename}" {columns} VALUES ({placeholders}) RETURNING *;', tuple(values)

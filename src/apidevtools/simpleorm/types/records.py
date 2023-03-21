@@ -32,8 +32,11 @@ class Records:
     def __aiter__(self) -> 'Records':
         return self
 
-    def __setitem__(self, index: int, value):
-        self._records[index] = value
+    def __getitem__(self, index: int) -> Record:
+        try:
+            return self._unwrap(self._records[index])
+        except IndexError:
+            return None
 
     async def __anext__(self) -> Record:
         try:
@@ -67,6 +70,8 @@ class Records:
         return self
 
     def order_by(self, columns: str | list[str], direction: str = 'ASC') -> 'Records':
+        columns = columns if isinstance(columns, list) else [columns]
+
         def keys(record) -> tuple:
             if not isinstance(record, dict):
                 record = dict(record)
