@@ -4,10 +4,10 @@ from typing import Any, MutableMapping
 import loguru
 
 from ..types import Relation
-from ._base import SQLConnector
+from ._connector import Connector
 
 
-class SQLite(SQLConnector):
+class SQLite(Connector):
     def __init__(self, database: str,
                  logger: Logger = loguru.logger):
         self.database: str = database if database.endswith('.sqlite') else f'{database}.sqlite'
@@ -62,21 +62,21 @@ class SQLite(SQLConnector):
             self.logger.error(error)
         return []
 
-    async def constructor__select_relation(
+    async def _constructor__select_relation(
             self, relation: Relation
     ) -> tuple[str, tuple[Any, ...]]:
         columns, values = ', '.join(relation.columns), tuple(relation.where.values())
         conditions = ' AND '.join([f'{key} = ?' for key in relation.where.keys()])
         return f'SELECT {columns} FROM "{relation.tablename}" WHERE {conditions};', values
 
-    async def constructor__select_instance(
+    async def _constructor__select_instance(
             self,
             instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
         conditions = ' AND '.join([f'{key} = ?' for key in instance.keys()])
         return f'SELECT * FROM "{tablename}" WHERE {conditions};', tuple(instance.values())
 
-    async def constructor__insert_instance(
+    async def _constructor__insert_instance(
             self,
             instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
@@ -84,7 +84,7 @@ class SQLite(SQLConnector):
         columns, values = str(tuple(instance.keys())).replace("'", '"'), instance.values()
         return f'INSERT INTO "{tablename}" {columns} VALUES ({placeholders}) RETURNING *;', tuple(values)
 
-    async def constructor__update_instance(
+    async def _constructor__update_instance(
             self,
             instance: dict, tablename: str, where: dict[str, Any]
     ) -> tuple[str, tuple[Any, ...]]:
@@ -92,7 +92,7 @@ class SQLite(SQLConnector):
         conditions = ' AND '.join([f'"{key}" = \'{value}\'' for key, value in where.items()])
         return f'UPDATE "{tablename}" SET {values} WHERE {conditions} RETURNING *;', tuple(instance.values())
 
-    async def constructor__delete_instance(
+    async def _constructor__delete_instance(
             self,
             instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:

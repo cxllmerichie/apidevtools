@@ -18,10 +18,11 @@ pip install aiodns ujson cchardet uvloop
         ```
         pip install pydantic loguru
         ```
-    - connectors
-        - redis ```pip install```
-        - postgresql ```pip install asyncpg```
-        - sqlite ```pip install```
+        - connectors
+            - postgresql ```pip install asyncpg```
+            - sqlite ```pip install aiosqlite```
+    - nosql
+        - redis ```pip install aioredis```
 - security
     - hasher
         ```

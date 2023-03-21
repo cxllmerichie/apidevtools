@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, MutableMapping
 
 
-class SQLConnector(ABC):
+class Connector(ABC):
     @abstractmethod
     def __init__(self, database: str, host: str, port: int | str, user: str, password: str | None):
         ...
@@ -28,21 +28,21 @@ class SQLConnector(ABC):
         ...
 
     @abstractmethod
-    async def constructor__select_relation(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def _constructor__select_relation(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...
 
     @abstractmethod
-    async def constructor__select_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def _constructor__select_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...
 
     @abstractmethod
-    async def constructor__insert_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def _constructor__insert_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...
 
     @abstractmethod
-    async def constructor__update_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def _constructor__update_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...
 
     @abstractmethod
-    async def constructor__delete_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
+    async def _constructor__delete_instance(self, *args, **kwargs) -> tuple[str, tuple[Any, ...]]:
         ...

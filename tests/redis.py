@@ -1,6 +1,6 @@
 import asyncio
 
-from src.apidevtools.simpleorm.nosql import Redis
+from src.apidevtools.simpleorm.redis import Redis
 
 
 loop = asyncio.get_event_loop()
