@@ -129,8 +129,11 @@ async def amain():
         db_user = await db.insert(instance, User)
         print(db_user)
 
-    async for i in await db.select('SELECT * FROM "user";'):
-        print(i)
+    db_users = await db.select('SELECT * FROM "user";', schema_t=User)
+    print(db_users.all())
+    print(db_users.first())
+    for db_user in db_users:
+        print(db_user)
 
     await shutdown()
 

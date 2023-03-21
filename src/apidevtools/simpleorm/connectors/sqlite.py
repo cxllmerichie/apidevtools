@@ -33,6 +33,8 @@ class SQLite(Connector):
         return True
 
     async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
+        # self.pool.executescript accepts only query, can not accept args
+        # used when no args passed, for cases like initializing db and creating tables on startup
         try:
             if len(args):
                 cursor: aiosqlite.Cursor = await self.pool.execute(query, args)
@@ -96,5 +98,5 @@ class SQLite(Connector):
             self,
             instance: dict, tablename: str
     ) -> tuple[str, tuple[Any, ...]]:
-        conditions = ' AND '.join([f'{key} = ?' for key in instance.keys()])
+        conditions = ' AND '.join([f'"{key}" = ?' for key in instance.keys()])
         return f'DELETE FROM "{tablename}" WHERE {conditions} RETURNING *;', tuple(instance.values())

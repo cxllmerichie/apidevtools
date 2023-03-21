@@ -7,6 +7,6 @@ services:
     environment:
       POSTGRES_DB: 'simpleorm_postgresql'
       POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: '0FD1Vg44au{U@0<fn@=M'
+      POSTGRES_PASSWORD: "h1=Q3mU3&O92v'<otR-V"
     image: postgres
     restart: always
