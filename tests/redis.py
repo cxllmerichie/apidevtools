@@ -3,9 +3,6 @@ import asyncio
 from src.apidevtools.simpleorm.redis import Redis
 
 
-loop = asyncio.get_event_loop()
-
-
 async def amain():
     db = Redis(host='localhost', port=6379, password="h1=Q3mU3&O92v'<otR-V")
     await db.create_pool()
@@ -17,4 +14,5 @@ async def amain():
     await db.close_pool()
 
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
     loop.run_until_complete(amain())

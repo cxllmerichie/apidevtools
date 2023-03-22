@@ -24,4 +24,10 @@ def decrypt(data: bytes | str, key: bytes | str, associated_data: bytes | str | 
     if associated_data:
         associated_data = associated_data if isinstance(associated_data, bytes) else associated_data.encode()
     decrypted = _AESGCM(key).decrypt(data[:12], data[12:], associated_data)
-    return decrypted if not convert else _ast.literal_eval(decrypted.decode())
+    if not convert:
+        return decrypted
+    try:
+        return _ast.literal_eval(decrypted.decode())
+    except ValueError:
+        return _ast.literal_eval(f'\'{decrypted.decode()}\'')
+
