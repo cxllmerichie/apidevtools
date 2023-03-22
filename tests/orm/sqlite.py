@@ -42,9 +42,14 @@ if __name__ == '__main__':
 
     db: ORM = ORM(
         connector=SQLite(database=DB_NAME),
-        # connector=SQLite(),
         logger=logger
     )
 
     loop = asyncio.get_event_loop()
+    loop.run_until_complete(amain(db, tables))
+
+    db: ORM = ORM(
+        connector=SQLite(),
+        logger=logger
+    )
     loop.run_until_complete(amain(db, tables))

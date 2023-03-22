@@ -5,20 +5,16 @@ from typing import Any
 
 class Relation:
     def __init__(self, ext_schema_t: type['Schema'], propname: str, rel_schema_t: type['Schema'], where: dict[str, Any]):
-        self.where: dict[str, Any] = where
         self.ext_schema_t: type['Schema'] = ext_schema_t
-        self.fieldname: str = propname
+        self.propname: str = propname
         self.rel_schema_t: type['Schema'] = rel_schema_t
+        self.where: dict[str, Any] = where
 
 
 class Schema(BaseModel, ABC):
     @property
     @_abstractmethod
     def __tablename__(self) -> str:
-        """
-        Abstract property, supposed to handles name of the database table
-        :return:
-        """
         ...
 
     def relations(self) -> list[Relation]:
@@ -31,4 +27,4 @@ class Schema(BaseModel, ABC):
         return self
 
 
-SchemaType = type[dict[str, Any] | Schema]
+RecordType = type[dict[str, Any] | Schema]

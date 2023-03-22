@@ -1,5 +1,4 @@
 from pydantic import Field
-from typing import Any
 
 from src.apidevtools.simpleorm import Schema, Relation, ORM
 
@@ -85,6 +84,7 @@ async def shutdown(db):
 async def amain(db: ORM, tables):
     await startup(db, tables)
 
+    # SCHEMA
     instance = UserCreate(email=f'string', password='string')
     db_user = await db.insert(instance, User)
     print(db_user)
@@ -97,14 +97,54 @@ async def amain(db: ORM, tables):
     db_item = await db.insert(item, Item)
     print(db_item)
 
-    db_user = (await db.select('SELECT * FROM simpleorm_user;', schema_t=User, depth=1)).first()
+    db_user = (await db.select('SELECT * FROM simpleorm_user;', record_t=User, rel_depth=2)).first()
     print(db_user)
 
     db_user.email = 'newemail'
     db_user = (await db.update(db_user, dict(id=db_user.id), User)).first()
     print(db_user)
 
-    db_user = (await db.delete(db_user, User, depth=2)).first()
+    db_user = (await db.delete(db_user, User, del_depth=2, rel_depth=1)).first()
+    print(db_user)
+
+    for i in range(10):
+        instance = UserCreate(email=f'{i}', password='string')
+        db_user = await db.insert(instance, User)
+        print(db_user)
+    db_users = await db.select('SELECT * FROM simpleorm_user;', record_t=User, rel_depth=2)
+    async for db_user in db_users:
+        print(db_user)
+    for db_user in db_users:
+        print(db_user)
+    print(db_users.order_by('id', 'DESC').all())
+    print(db_users.order_by(['id', 'email'], 'DESC').all())
+    print(db_users.order_by(['id', 'email'], 'ASC').all())
+    # DICTIONARY
+    print()
+
+    instance = dict(email=f'string', password='string')
+    db_user = await db.insert(instance, tablename=User.__tablename__)
+    print(db_user)
+
+    category = dict(title='title', description='description', user_id=db_user['id'])
+    db_category = await db.insert(category, tablename=Category.__tablename__)
+    print(db_category)
+
+    item = dict(title='title', description='description', category_id=db_category['id'])
+    db_item = await db.insert(item, tablename=Item.__tablename__)
+    print(db_item)
+
+    db_user = (await db.select('SELECT * FROM simpleorm_user;', rel_depth=2)).first()
+    print(db_user)
+
+    db_user['email'] = 'newemail'
+    db_user = (await db.update(db_user, dict(id=db_user['id']), tablename=User.__tablename__)).first()
+    print(db_user)
+
+    db_user = (await db.delete(db_user, tablename=User.__tablename__, del_depth=2)).first()
+    print(db_user)
+
+    db_user = (await db.delete(dict(email='newemail'), User, User.__tablename__, del_depth=2, rel_depth=1)).first()
     print(db_user)
 
     await shutdown(db)

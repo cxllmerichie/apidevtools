@@ -1,18 +1,18 @@
 from typing import MutableMapping, Any
 from contextlib import suppress as _suppress
 
-from .schema import Schema, SchemaType
+from .schema import Schema, RecordType
 
 
 Record = dict[str, Any] | Schema | None
 
 
 class Records:
-    def __init__(self, records: list[MutableMapping], schema_t: SchemaType = dict[str, Any]):
-        if schema_t.__name__ == 'dict':
+    def __init__(self, records: list[MutableMapping], record_t: RecordType = dict[str, Any]):
+        if record_t.__name__ == 'dict':
             self.record_t, self._unwrap = dict[str, Any], lambda record: dict(record)
-        elif schema_t.__class__.__name__ == 'ModelMetaclass':
-            self.record_t, self._unwrap = Schema, lambda record: schema_t(**dict(record)).from_db()
+        elif record_t.__class__.__name__ == 'ModelMetaclass':
+            self.record_t, self._unwrap = Schema, lambda record: record_t(**dict(record)).from_db()
         else:
             raise TypeError('`schema_t` must be `Schema` of `dict[str, Any]`')
         self._records: list[MutableMapping] = records
@@ -77,7 +77,7 @@ class Records:
                 record = dict(record)
             return tuple([record[column] for column in columns])
         self._records = sorted(
-            [self._unwrap(record) for record in self._records],
+            self._records,
             key=columns if isinstance(columns, str) else keys,
             reverse=(direction.upper() == 'DESC')
         )
