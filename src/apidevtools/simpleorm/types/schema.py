@@ -20,11 +20,12 @@ class Schema(BaseModel, ABC):
     def relations(self) -> list[Relation]:
         return []
 
-    def into_db(self) -> 'Schema':
+    async def into_db(self) -> 'Schema':
         return self
 
-    def from_db(self) -> 'Schema':
+    async def from_db(self) -> 'Schema':
         return self
 
 
-RecordType = type[dict[str, Any] | Schema]
+ExistingRecord = dict[str, Any] | Schema
+RecordType = type[ExistingRecord]

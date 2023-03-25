@@ -97,14 +97,14 @@ async def amain(db: ORM, tables):
     db_item = await db.insert(item, Item)
     print(db_item)
 
-    db_user = (await db.select('SELECT * FROM simpleorm_user;', record_t=User, rel_depth=2)).first()
+    db_user = await (await db.select('SELECT * FROM simpleorm_user;', record_t=User, rel_depth=2)).first()
     print(db_user)
 
     db_user.email = 'newemail'
-    db_user = (await db.update(db_user, dict(id=db_user.id), User)).first()
+    db_user = await (await db.update(db_user, dict(id=db_user.id), User)).first()
     print(db_user)
 
-    db_user = (await db.delete(db_user, User, del_depth=2, rel_depth=1)).first()
+    db_user = await (await db.delete(db_user, User, del_depth=2, rel_depth=1)).first()
     print(db_user)
 
     for i in range(10):
@@ -114,11 +114,9 @@ async def amain(db: ORM, tables):
     db_users = await db.select('SELECT * FROM simpleorm_user;', record_t=User, rel_depth=2)
     async for db_user in db_users:
         print(db_user)
-    for db_user in db_users:
-        print(db_user)
-    print(db_users.order_by('id', 'DESC').all())
-    print(db_users.order_by(['id', 'email'], 'DESC').all())
-    print(db_users.order_by(['id', 'email'], 'ASC').all())
+    print(await db_users.order_by('id', 'DESC').all())
+    print(await db_users.order_by(['id', 'email'], 'DESC').all())
+    print(await db_users.order_by(['id', 'email'], 'ASC').all())
     # DICTIONARY
     print()
 
@@ -134,17 +132,17 @@ async def amain(db: ORM, tables):
     db_item = await db.insert(item, tablename=Item.__tablename__)
     print(db_item)
 
-    db_user = (await db.select('SELECT * FROM simpleorm_user;', rel_depth=2)).first()
+    db_user = await (await db.select('SELECT * FROM simpleorm_user;', rel_depth=2)).first()
     print(db_user)
 
     db_user['email'] = 'newemail'
-    db_user = (await db.update(db_user, dict(id=db_user['id']), tablename=User.__tablename__)).first()
+    db_user = await (await db.update(db_user, dict(id=db_user['id']), tablename=User.__tablename__)).first()
     print(db_user)
 
-    db_user = (await db.delete(db_user, tablename=User.__tablename__, del_depth=2)).first()
+    db_user = await (await db.delete(db_user, tablename=User.__tablename__, del_depth=2)).first()
     print(db_user)
 
-    db_user = (await db.delete(dict(email='newemail'), User, User.__tablename__, del_depth=2, rel_depth=1)).first()
+    db_user = await (await db.delete(dict(email='newemail'), User, User.__tablename__, del_depth=2, rel_depth=1)).first()
     print(db_user)
 
     await shutdown(db)
