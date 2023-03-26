@@ -1,0 +1,2 @@
+INF: int = 2147483647
+LIMIT: int = 100
