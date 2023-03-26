@@ -2,7 +2,7 @@ from loguru._logger import Logger
 from typing import Any
 import loguru
 
-from apidevtools import INF
+from ..utils import INF
 from .types import RecordType, Record, Schema, Records
 from .connectors._connector import Connector
 

@@ -7,8 +7,9 @@ from typing import Any
 
 
 class Redis:
-    def __init__(self, host: str, port: int | str, user: str | None = None, password: str | None = None,
+    def __init__(self, database: int, host: str, port: int | str, user: str | None = None, password: str | None = None,
                  logger: Logger = loguru.logger):
+        self.database: int = database
         self.host: str = host
         self.port: str | int = port
         self.user: str | None = user
@@ -20,7 +21,7 @@ class Redis:
     async def create_pool(self) -> bool:
         try:
             self.pool = _aioredis.Redis(
-                host=self.host, port=self.port, username=self.user, password=self.password
+                db=self.database, host=self.host, port=self.port, username=self.user, password=self.password
             )
             return True
         except Exception as error:
