@@ -1,22 +1,9 @@
-from src.apidevtools.simpleorm import Relation, Schema
+from src.apidevtools.media import imgproc
 
 
-class KindaShema(Schema):
-    __tablename__ = 'ase'
-
-    id: int
-    another: type
-
-    __relations__ = [
-        Relation('item', dict(category_id='id'), type, 'items', type, ['*']),
-        Relation('item', dict(category_id='another'), type, 'items', type, ['*']),
-    ]
-
-    @property
-    def relations(self):
-        return self.__relations__
-
-
-s = KindaShema(**dict(id=1, another=dict))
-print(s)
-print(s.relations)
+imgproc.default('USR').image.save('PRIVATE.png', 'PNG')
+imgproc.default('BOT').image.save('BOT.png', 'PNG')
+imgproc.default('GRP').image.save('GROUP.png', 'PNG')
+imgproc.default('SGR').image.save('SUPERGROUP.png', 'PNG')
+imgproc.default('CHN').image.save('CHANNEL.png', 'PNG')
+imgproc.default('CHN').image.save('CHANNEL.png', 'PNG')

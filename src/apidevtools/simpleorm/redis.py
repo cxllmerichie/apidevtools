@@ -1,13 +1,15 @@
-import asyncio as _asyncio
 import aioredis as _aioredis
 import loguru
 from loguru._logger import Logger
-import ast as _ast
 from typing import Any
+
+from ..utils import evaluate as _evaluate
 
 
 class Redis:
-    def __init__(self, database: int, host: str, port: int | str, user: str | None = None, password: str | None = None,
+    def __init__(self, database: int = 0,
+                 host: str = 'localhost', port: int | str = 6379,
+                 user: str | None = None, password: str | None = None,
                  logger: Logger = loguru.logger):
         self.database: int = database
         self.host: str = host
@@ -36,25 +38,17 @@ class Redis:
             self.logger.error(error)
             return False
 
-    def __getitem__(self, key) -> Any:
-        try:
-            async def evaluate():
-                return _ast.literal_eval((await self.pool.get(key)).decode())
-            return evaluate()
-        except Exception as error:
-            self.logger.error(error)
-            return _asyncio.get_event_loop().run_in_executor(None, lambda: None)
-
     async def set(self, key: Any, value: Any) -> bool:
         try:
-            return await self.pool.set(key, value)
+            return await self.pool.set(str(key), str(value))
         except Exception as error:
             self.logger.error(error)
             return False
 
-    async def get(self, key: Any) -> bytes | None:
+    async def get(self, key: Any, convert: bool = False) -> bytes | None:
         try:
-            return await self.pool.get(key)
+            value = await self.pool.get(str(key))
+            return _evaluate(value, convert)
         except Exception as error:
             self.logger.error(error)
             return None
