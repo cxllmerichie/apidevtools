@@ -2,7 +2,7 @@ from loguru._logger import Logger
 from typing import Any
 import loguru
 
-from ..utils import INF
+from ..utils import INF, is_dict as _is_dict
 from .types import RecordType, Record, Schema, Records, Relation, Instance
 from .connectors._connector import Connector
 
@@ -35,7 +35,7 @@ class ORM:
             *, rel_depth: int = 0
     ) -> Records:
         records = Records(await self.connector.fetchall(query, args), record_t)
-        for index, record in enumerate(await records.all()) if record_t.__name__ != 'dict' and rel_depth else ():
+        for index, record in enumerate(await records.all()) if not _is_dict(record_t) and rel_depth else ():
             for relation in record.relations():
                 query, args = await self.connector._constructor__select_relations(relation)
                 instances = await (await self.select(query, args, relation.rel_schema_t, rel_depth=rel_depth - 1)).all()
@@ -66,7 +66,7 @@ class ORM:
         instance, tablename = await self.__parse_parameters(instance, tablename)
         query, args = await self.connector._constructor__select_instances(instance, tablename)
         records = await self.select(query, args, record_t)
-        for index, record in enumerate(await records.all()) if record_t.__name__ != 'dict' and del_depth else ():
+        for index, record in enumerate(await records.all()) if not _is_dict(record_t) and del_depth else ():
             for relation in record.relations():
                 instances = await (await self.delete(
                     relation.where, relation.rel_schema_t, relation.rel_schema_t.__tablename__, del_depth=del_depth - 1

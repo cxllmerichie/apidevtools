@@ -2,6 +2,7 @@ from typing import MutableMapping, Any, Coroutine, Iterator
 from contextlib import suppress as _suppress
 
 from .schema import Schema
+from ...utils import is_dict as _is_dict
 
 
 Instance = dict[str, Any] | Schema
@@ -23,7 +24,7 @@ class Records:
         async def unwrap_to_schema(record: MutableMapping) -> Schema:
             return await self.record_t(**dict(record)).from_db()
 
-        return unwrap_to_dict if self.record_t.__name__ == 'dict' else unwrap_to_schema
+        return unwrap_to_dict if _is_dict(self.record_t) else unwrap_to_schema
 
     def __len__(self) -> int:
         return len(self._records)
