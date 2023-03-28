@@ -1,20 +1,22 @@
 from typing import MutableMapping, Any, Coroutine, Iterator
 from contextlib import suppress as _suppress
 
-from .schema import Schema, RecordType, ExistingRecord
+from .schema import Schema
 
 
-Record = ExistingRecord | None
+Instance = dict[str, Any] | Schema
+Record = Instance | None
+RecordType = type[Instance]
 
 
 class Records:
     def __init__(self, records: list[MutableMapping], record_t: RecordType = dict[str, Any]):
         self.record_t: RecordType = record_t
-        self._unwrap: Coroutine[Any, Any, ExistingRecord] = self._unwrapper()
+        self._unwrap: Coroutine[Any, Any, Instance] = self._unwrapper()
         self._records: list[MutableMapping] = records
         self._aiter: Iterator = iter(records)
 
-    def _unwrapper(self) -> Coroutine[Any, Any, ExistingRecord]:
+    def _unwrapper(self) -> Coroutine[Any, Any, Instance]:
         async def unwrap_to_dict(record: MutableMapping) -> dict[str, Any]:
             return dict(record)
 
@@ -29,13 +31,13 @@ class Records:
     def __aiter__(self) -> 'Records':
         return self
 
-    async def __anext__(self) -> ExistingRecord:
+    async def __anext__(self) -> Instance:
         try:
             return await self._unwrap(next(self._aiter))
         except StopIteration:
             raise StopAsyncIteration
 
-    async def all(self) -> list[ExistingRecord]:
+    async def all(self) -> list[Instance]:
         return [await self._unwrap(record) for record in self._records]
 
     async def first(self) -> Record:

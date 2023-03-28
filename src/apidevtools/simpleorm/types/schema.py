@@ -25,7 +25,3 @@ class Schema(BaseModel, ABC):
 
     async def from_db(self) -> 'Schema':
         return self
-
-
-ExistingRecord = dict[str, Any] | Schema
-RecordType = type[ExistingRecord]

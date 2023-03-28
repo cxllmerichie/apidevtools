@@ -1,2 +1,2 @@
-from .schema import Schema, RecordType, Relation
-from .records import Records, Record
+from .schema import Schema, Relation
+from .records import Records, RecordType, Record, Instance

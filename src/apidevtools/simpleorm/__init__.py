@@ -1,2 +1,2 @@
 from .orm import ORM
-from .types import Schema, Record, Relation
+from .types import Schema, Record, Relation, Records, Instance

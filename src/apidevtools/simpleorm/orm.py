@@ -3,11 +3,8 @@ from typing import Any
 import loguru
 
 from ..utils import INF
-from .types import RecordType, Record, Schema, Records
+from .types import RecordType, Record, Schema, Records, Relation, Instance
 from .connectors._connector import Connector
-
-
-Instance = dict[str, Any] | Schema
 
 
 class ORM:
@@ -38,18 +35,11 @@ class ORM:
             *, rel_depth: int = 0
     ) -> Records:
         records = Records(await self.connector.fetchall(query, args), record_t)
-        for index, record in enumerate(await records.all()) if record_t.__name__ != 'dict' else ():
-            if rel_depth == 0:
-                break
+        for index, record in enumerate(await records.all()) if record_t.__name__ != 'dict' and rel_depth else ():
             for relation in record.relations():
                 query, args = await self.connector._constructor__select_relations(relation)
                 instances = await (await self.select(query, args, relation.rel_schema_t, rel_depth=rel_depth - 1)).all()
-                if isinstance(record, dict):
-                    record[relation.propname] = instances
-                elif isinstance(record, Schema):
-                    record = relation.ext_schema_t(**dict(record))
-                    setattr(record, relation.propname, instances)
-                records._records[index] = relation.ext_schema_t(**dict(record))
+                records = await self.__attach_instances(records, record, relation, instances, index)
         return records
 
     async def insert(
@@ -76,39 +66,41 @@ class ORM:
         instance, tablename = await self.__parse_parameters(instance, tablename)
         query, args = await self.connector._constructor__select_instances(instance, tablename)
         records = await self.select(query, args, record_t)
-        for index, record in enumerate(await records.all()) if record_t.__name__ != 'dict' else ():
-            if del_depth == 0:
-                break
+        for index, record in enumerate(await records.all()) if record_t.__name__ != 'dict' and del_depth else ():
             for relation in record.relations():
                 instances = await (await self.delete(
                     relation.where, relation.rel_schema_t, relation.rel_schema_t.__tablename__, del_depth=del_depth - 1
                 )).all()
-                if rel_depth == 0:
-                    break
-                if isinstance(record, dict):
-                    record[relation.propname] = instances
-                elif isinstance(record, Schema):
-                    record = relation.ext_schema_t(**dict(record))
-                    setattr(record, relation.propname, instances)
-                records._records[index] = relation.ext_schema_t(**dict(record))
+                if rel_depth:
+                    records = await self.__attach_instances(records, record, relation, instances, index)
         await self.connector.execute(*(await self.connector._constructor__delete_instances(instance, tablename)))
         return records
 
-    async def __parse_instance(self, instance: dict[str, Any], tablename: str)\
-            -> tuple[tuple[str, ...], tuple[str, ...]]:
+    async def __attach_instances(
+            self,
+            records: Records, record: Record, relation: Relation, instances: list[Schema], index: int
+    ) -> Records:
+        if isinstance(record, dict):
+            record[relation.propname] = instances
+        elif isinstance(record, Schema):
+            record = relation.ext_schema_t(**dict(record))
+            setattr(record, relation.propname, instances)
+        records._records[index] = relation.ext_schema_t(**dict(record))
+        return records
+
+    async def __parse_parameters(
+            self,
+            instance: Instance, tablename: str
+    ) -> tuple[dict[str, Any], str]:
+        if isinstance(instance, Schema):
+            tablename = instance.__tablename__
+            instance = dict(await instance.into_db())
+        if not tablename:
+            raise AttributeError('Specify "tablename" if "instance" is a "dict", otherwise pass "Schema" object')
         db_columns = await self.connector.columns(tablename)
         instance_columns = set(instance.keys())
         columns = instance_columns.intersection(db_columns)
         for key in instance_columns.difference(db_columns):
             if key not in columns:
                 instance.pop(key)
-        return tuple(columns), tuple([instance[column] for column in columns])
-
-    async def __parse_parameters(self, instance: Instance, tablename: str) -> tuple[Record, str]:
-        if isinstance(instance, Schema):
-            tablename = instance.__tablename__
-            instance = dict(await instance.into_db())
-        if not tablename:
-            raise AttributeError('Specify "tablename" if "instance" is a "dict", otherwise pass "Schema" object')
-        await self.__parse_instance(instance, tablename)
         return instance, tablename
