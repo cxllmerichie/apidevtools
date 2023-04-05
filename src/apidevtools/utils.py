@@ -1,9 +1,14 @@
 from typing import Any
 import ast as _ast
+import datetime
 
 
 INF: int = 2147483647
 LIMIT: int = 100
+
+
+def utcnow() -> datetime.datetime:
+    return datetime.datetime.utcnow()
 
 
 def evaluate(value: bytes, convert: bool = True) -> Any:
@@ -21,12 +26,14 @@ def evaluate(value: bytes, convert: bool = True) -> Any:
         return _ast.literal_eval(f'\'{value.decode()}\'')
     except SyntaxError:
         return value.decode()
+    except AttributeError:
+        return None
 
 
-def is_dict(typehinted: type) -> bool:
+def is_dict(subscripted_dict_type: type[dict]) -> bool:
     """
     compares `dict[Any, Any]` with `dict`, normally done using `is`, but does not work for typehinted types
-    :param typehinted:
+    :param subscripted_dict_type:
     :return:
     """
-    return typehinted.__name__ == 'dict'
+    return subscripted_dict_type.__name__ == 'dict'

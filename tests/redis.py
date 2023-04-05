@@ -4,11 +4,10 @@ from src.apidevtools.simpleorm.redis import Redis
 
 
 async def amain():
-    db = Redis(host='localhost', port=6379, password="h1=Q3mU3&O92v'<otR-V")
+    db = Redis(database=0, host='localhost', port=6379, password="LAIOAyNd9`H4v{FrWs2c8p2e=y552v#3L6[4U]b1<4u@?#]C&2")
     await db.create_pool()
 
-    print(await db.set('key', 1))
-    print(await db['key'])
+    print(await db.set('key', 32))
     print(await db.get('key'))
 
     await db.close_pool()

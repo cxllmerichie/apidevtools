@@ -14,14 +14,18 @@ class ORM:
 
     async def create_pool(self) -> bool:
         try:
-            return await self.connector.create_pool()
+            is_created = await self.connector.create_pool()
+            self.logger.info(f'`ORM.connector` pool created')
+            return is_created
         except Exception as error:
             self.logger.error(error)
             return False
 
     async def close_pool(self) -> bool:
         try:
-            return await self.connector.close_pool()
+            is_closed = await self.connector.close_pool()
+            self.logger.info(f'`ORM.connector` pool closed')
+            return is_closed
         except Exception as error:
             self.logger.error(f'{error}')
             return False
@@ -35,6 +39,8 @@ class ORM:
             *, rel_depth: int = 0
     ) -> Records:
         records = Records(await self.connector.fetchall(query, args), record_t)
+        if rel_depth and _is_dict(record_t):
+            self.logger.warning(f'`record_t` is not `Schema` ({record_t}) but `rel_depth` is set to {rel_depth}')
         for index, record in enumerate(await records.all()) if not _is_dict(record_t) and rel_depth else ():
             for relation in record.relations():
                 query, args = await self.connector._constructor__select_relations(relation)
@@ -66,6 +72,8 @@ class ORM:
         instance, tablename = await self.__parse_parameters(instance, tablename)
         query, args = await self.connector._constructor__select_instances(instance, tablename)
         records = await self.select(query, args, record_t)
+        if del_depth and _is_dict(record_t):
+            self.logger.warning(f'`record_t` is not `Schema` ({record_t}) but `del_depth` is set to {del_depth}')
         for index, record in enumerate(await records.all()) if not _is_dict(record_t) and del_depth else ():
             for relation in record.relations():
                 instances = await (await self.delete(

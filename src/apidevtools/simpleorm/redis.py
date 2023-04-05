@@ -38,12 +38,13 @@ class Redis:
             self.logger.error(error)
             return False
 
-    async def set(self, key: Any, value: Any) -> bool:
+    async def set(self, key: Any, value: Any) -> Any:
         try:
-            return await self.pool.set(str(key), str(value))
+            if await self.pool.set(str(key), str(value)):
+                return value
         except Exception as error:
             self.logger.error(error)
-            return False
+        return None
 
     async def get(self, key: Any, convert: bool = False) -> bytes | None:
         try:
