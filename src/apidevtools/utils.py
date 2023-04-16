@@ -7,8 +7,14 @@ INF: int = 2147483647
 LIMIT: int = 100
 
 
-def utcnow() -> datetime.datetime:
-    return datetime.datetime.utcnow()
+def now_tz_aware() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
+def now_tz_naive() -> datetime.datetime:
+    dt = datetime.datetime.now()
+    dt.replace(tzinfo=None)
+    return dt
 
 
 def evaluate(value: bytes, convert: bool = True) -> Any:
