@@ -12,6 +12,8 @@ class Relation:
 
 
 class Schema(BaseModel, ABC):
+    __noupdate__ = []
+
     @property
     @_abstractmethod
     def __tablename__(self) -> str:

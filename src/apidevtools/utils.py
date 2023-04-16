@@ -38,7 +38,7 @@ def evaluate(value: bytes, convert: bool = True) -> Any:
 
 def is_dict(subscripted_dict_type: type[dict]) -> bool:
     """
-    compares `dict[Any, Any]` with `dict`, normally done using `is`, but does not work for typehinted types
+    compares `dict[Any, Any]` with `dict`, normally done using `is`, but does not work for subscripted types
     :param subscripted_dict_type:
     :return:
     """

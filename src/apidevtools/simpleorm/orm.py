@@ -1,6 +1,7 @@
 from loguru._logger import Logger
 from typing import Any
 import loguru
+import inspect as _inspect
 
 from ..utils import INF, is_dict as _is_dict
 from .types import RecordType, Record, Schema, Records, Relation, Instance
@@ -74,6 +75,8 @@ class ORM:
         records = await self.select(query, args, record_t)
         if del_depth and _is_dict(record_t):
             self.logger.warning(f'`record_t` is not `Schema` ({record_t}) but `del_depth` is set to {del_depth}')
+        if rel_depth and _is_dict(record_t):
+            self.logger.warning(f'`record_t` is not `Schema` ({record_t}) but `rel_depth` is set to {rel_depth}')
         for index, record in enumerate(await records.all()) if not _is_dict(record_t) and del_depth else ():
             for relation in record.relations():
                 instances = await (await self.delete(
@@ -102,7 +105,11 @@ class ORM:
     ) -> tuple[dict[str, Any], str]:
         if isinstance(instance, Schema):
             tablename = instance.__tablename__
+            noupdate = instance.__noupdate__
             instance = dict(await instance.into_db())
+            if _inspect.stack()[1][3] == 'update':
+                for key in noupdate:
+                    instance.pop(key)
         if not tablename:
             raise AttributeError('Specify "tablename" if "instance" is a "dict", otherwise pass "Schema" object')
         db_columns = await self.connector.columns(tablename)
