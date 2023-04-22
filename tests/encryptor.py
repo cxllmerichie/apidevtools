@@ -1,11 +1,11 @@
 from src.apidevtools.security import encryptor, hasher
 
 
-raw = 'toencrypt'
+raw = 'raw'
 encrypted, key = encryptor.encrypt(raw)
 assert encryptor.decrypt(encrypted, key, convert=True) == raw
 
 
-unhashed = 'sometgingtohash'
+unhashed = 'unhashed'
 hashed = hasher.hash(unhashed)
 assert hasher.cmp(hashed, unhashed)

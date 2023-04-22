@@ -41,7 +41,7 @@ class ORM:
     ) -> Records:
         records = Records(await self.connector.fetchall(query, args), record_t)
         if rel_depth and _is_dict(record_t):
-            self.logger.warning(f'`record_t` is not `Schema` ({record_t}) but `rel_depth` is set to {rel_depth}')
+            self.logger.warning(f'`ORM.select(rel_depth={rel_depth})` but `record_t` is not `Schema` ({record_t})')
         for index, record in enumerate(await records.all()) if not _is_dict(record_t) and rel_depth else ():
             for relation in record.relations():
                 query, args = await self.connector._constructor__select_relations(relation)
@@ -59,11 +59,20 @@ class ORM:
 
     async def update(
             self,
-            instance: Instance, where: dict[str, Any], record_t: RecordType = dict[str, Any], tablename: str = None
+            instance: Instance, where: dict[str, Any], record_t: RecordType = dict[str, Any], tablename: str = None,
+            *, rel_depth: int = 0
     ) -> Records:
         instance, tablename = await self.__parse_parameters(instance, tablename)
         query, args = await self.connector._constructor__update_instances(instance, tablename, where)
-        return Records(await self.connector.fetchall(query, args), record_t)
+        records = Records(await self.connector.fetchall(query, args), record_t)
+        if rel_depth and _is_dict(record_t):
+            self.logger.warning(f'`ORM.update(rel_depth={rel_depth})` but `record_t` is not `Schema` ({record_t})')
+        for index, record in enumerate(await records.all()) if not _is_dict(record_t) and rel_depth else ():
+            for relation in record.relations():
+                query, args = await self.connector._constructor__select_relations(relation)
+                instances = await (await self.select(query, args, relation.rel_schema_t, rel_depth=rel_depth - 1)).all()
+                records = await self.__attach_instances(records, record, relation, instances, index)
+        return records
 
     async def delete(
             self,
@@ -74,9 +83,9 @@ class ORM:
         query, args = await self.connector._constructor__select_instances(instance, tablename)
         records = await self.select(query, args, record_t)
         if del_depth and _is_dict(record_t):
-            self.logger.warning(f'`record_t` is not `Schema` ({record_t}) but `del_depth` is set to {del_depth}')
+            self.logger.warning(f'`ORM.delete(del_depth={del_depth})` but `record_t` is not `Schema` ({record_t})')
         if rel_depth and _is_dict(record_t):
-            self.logger.warning(f'`record_t` is not `Schema` ({record_t}) but `rel_depth` is set to {rel_depth}')
+            self.logger.warning(f'`ORM.delete(rel_depth={rel_depth})` but `record_t` is not `Schema` ({record_t})')
         for index, record in enumerate(await records.all()) if not _is_dict(record_t) and del_depth else ():
             for relation in record.relations():
                 instances = await (await self.delete(
