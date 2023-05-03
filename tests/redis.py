@@ -9,6 +9,7 @@ async def amain():
 
     print(await db.set('key', 32))
     print(await db.get('key'))
+    print(await db.delete('key'))
 
     await db.close_pool()
 

@@ -46,7 +46,7 @@ class ORM:
             for relation in record.relations():
                 query, args = await self.connector._constructor__select_relations(relation)
                 instances = await (await self.select(query, args, relation.rel_schema_t, rel_depth=rel_depth - 1)).all()
-                records = await self.__attach_instances(records, record, relation, instances, index)
+                records, record = await self.__attach_instances(records, record, relation, instances, index)
         return records
 
     async def insert(
@@ -71,7 +71,7 @@ class ORM:
             for relation in record.relations():
                 query, args = await self.connector._constructor__select_relations(relation)
                 instances = await (await self.select(query, args, relation.rel_schema_t, rel_depth=rel_depth - 1)).all()
-                records = await self.__attach_instances(records, record, relation, instances, index)
+                records, record = await self.__attach_instances(records, record, relation, instances, index)
         return records
 
     async def delete(
@@ -92,21 +92,21 @@ class ORM:
                     relation.where, relation.rel_schema_t, relation.rel_schema_t.__tablename__, del_depth=del_depth - 1
                 )).all()
                 if rel_depth:
-                    records = await self.__attach_instances(records, record, relation, instances, index)
+                    records, record = await self.__attach_instances(records, record, relation, instances, index)
         await self.connector.execute(*(await self.connector._constructor__delete_instances(instance, tablename)))
         return records
 
     async def __attach_instances(
             self,
             records: Records, record: Record, relation: Relation, instances: list[Schema], index: int
-    ) -> Records:
+    ) -> tuple[Records, Record]:
         if isinstance(record, dict):
             record[relation.propname] = instances
         elif isinstance(record, Schema):
             record = relation.ext_schema_t(**dict(record))
             setattr(record, relation.propname, instances)
         records._records[index] = relation.ext_schema_t(**dict(record))
-        return records
+        return records, record
 
     async def __parse_parameters(
             self,

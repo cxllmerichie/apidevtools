@@ -53,3 +53,12 @@ class Redis:
         except Exception as error:
             self.logger.error(error)
             return None
+
+    async def delete(self, key: Any, convert: bool = False) -> bytes | None:
+        try:
+            value = await self.pool.delete(str(key))
+            return _evaluate(value, convert)
+        except Exception as error:
+            self.logger.error(error)
+            return None
+
