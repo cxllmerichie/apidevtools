@@ -61,7 +61,7 @@ def generate(
     if not fonttf:
         from os import path
 
-        fonttf = path.join(path.basename(__file__), 'ARIALNB.TTF')
+        fonttf = path.join(path.dirname(__file__), 'ARIALNB.TTF')
 
     font = _ImageFont.truetype(font=fonttf, size=int(size * 0.6))
     img = PIL.Image.new(mode='RGB', size=(size, size), color=bg_color)

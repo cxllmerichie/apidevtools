@@ -4,24 +4,23 @@ import sys as _sys
 import os as _os
 
 
+_logger_format = '{level.icon} <yellow>|</yellow> <blue>{time:YYYY-MM-DD HH:mm:ss}</blue> <yellow>|</yellow> <level>{level.name} - {message}</level>'
 _logger.configure(handlers=[{
     'sink': _sys.stderr,
-    'format': '{level.icon} <yellow>|</yellow> <blue>{time:YYYY-MM-DD HH:mm:ss}</blue> <yellow>|</yellow> <level>{level.name} - {message}</level>'
+    'format': _logger_format
 }])
 
 
 class LoggerManager:
     @staticmethod
-    def add(self, filepath: str) -> Logger:
+    def add(filepath: str) -> Logger:
         if filepath.endswith('.log'):
             name = _os.path.basename(filepath).rstrip('.log')
         else:
             name = filepath
             filepath = f'{filepath}.log'
-        _logger.add(filepath, enqueue=True, backtrace=True, diagnose=True, format=self.__logger_format,
-                    filter=lambda r: name in r['extra'])
-        logger = _logger.bind(**{name: True})
-        return logger
+        _logger.add(filepath, enqueue=True, backtrace=True, diagnose=True, format=_logger_format, filter=lambda r: name in r['extra'])
+        return _logger.bind(**{name: True})
 
     @staticmethod
     def logger() -> Logger:
