@@ -61,7 +61,7 @@ dependencies=[
 ]
 
 [tool.setuptools.package-data]
-apidevtools = ["template/template.zip"]
+apidevtools = ["template/template.zip", "media/ARIALNB.TTF"]
 
 [project.urls]
 "Homepage" = "https://github.com/cxllmerichie/apidevtools"
