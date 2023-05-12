@@ -1,16 +1,15 @@
 import aioredis as _aioredis
-import loguru
-from loguru._logger import Logger
 from typing import Any
 
 from ..utils import evaluate as _evaluate
+from ..logman import LoggerManager, Logger
 
 
 class Redis:
     def __init__(self, database: int = 0,
                  host: str = 'localhost', port: int | str = 6379,
                  user: str | None = None, password: str | None = None,
-                 logger: Logger = loguru.logger):
+                 logger: Logger = LoggerManager.logger()):
         self.database: int = database
         self.host: str = host
         self.port: str | int = port

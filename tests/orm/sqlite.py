@@ -1,8 +1,8 @@
 import asyncio
-from loguru import logger
 
 from src.apidevtools.simpleorm.connectors.sqlite import SQLite
 from src.apidevtools.simpleorm import ORM
+from src.apidevtools.logman import LoggerManager
 
 from tests.orm.data import amain
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     db: ORM = ORM(
         connector=SQLite(database=DB_NAME),
-        logger=logger
+        logger=LoggerManager.logger()
     )
 
     loop = asyncio.get_event_loop()
@@ -50,6 +50,6 @@ if __name__ == '__main__':
 
     db: ORM = ORM(
         connector=SQLite(),
-        logger=logger
+        logger=LoggerManager.logger()
     )
     loop.run_until_complete(amain(db, tables))

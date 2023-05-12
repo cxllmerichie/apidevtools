@@ -1,17 +1,16 @@
 import aiosqlite as _aiosqlite
-from loguru._logger import Logger
 from typing import Any, MutableMapping
-import loguru
 
 from ..types import Relation
 from ._connector import Connector
+from ...logman import LoggerManager, Logger
 
 
 class SQLite(Connector):
     __memory = ':memory:'
 
     def __init__(self, database: str = __memory,
-                 logger: Logger = loguru.logger):
+                 logger: Logger = LoggerManager.logger()):
         self.database: str = database if database.endswith(('.sqlite', '.db')) or database == self.__memory else f'{database}.sqlite'
 
         self.logger: Logger = logger

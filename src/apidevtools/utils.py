@@ -36,10 +36,10 @@ def evaluate(value: bytes, convert: bool = True) -> Any:
         return None
 
 
-def is_dict(subscripted_dict_type: type[dict]) -> bool:
+def is_dict(dict_t: type[dict[Any, Any]]) -> bool:
     """
     compares `dict[Any, Any]` with `dict`, normally done using `is`, but does not work for subscripted types
-    :param subscripted_dict_type:
+    :param dict_t:
     :return:
     """
-    return subscripted_dict_type.__name__ == 'dict'
+    return dict_t.__name__ == 'dict'

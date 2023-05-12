@@ -2,13 +2,6 @@ import io
 import PIL.Image
 from PIL import ImageDraw as _ImageDraw, ImageFont as _ImageFont
 import numpy as _np
-import pathlib as _pathlib
-import os as _os
-
-
-# make the package entirely async
-# try to replace numpy with pure python
-# fix fonts
 
 
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
@@ -50,33 +43,8 @@ class Image:
 
         return await telegraph.upload(self.bytesio)
 
-#
-# class Font:
-#     @staticmethod
-#     def system() -> list[str]:
-#         """
-#         Get a list of system fonts
-#         :return:
-#         """
-#         if _os.name != 'nt':
-#             raise OSError('System fonts are available only for Windows. Please wait for an update.')
-#         paths = _pathlib.PurePath(_pathlib.Path.home().drive, _os.sep, 'windows', 'fonts')
-#         return [str(path.absolute()) for path in list(_pathlib.Path(paths).glob('*.ttf'))]
-#
-#     @staticmethod
-#     def font(ttf_name: str) -> str:
-#         """
-#         Find a system font by its name, if not found returns ARIALNB by default
-#         :param ttf_name:
-#         :return:
-#         """
-#         # try the similarity approach https://www.geeksforgeeks.org/python-word-similarity-using-spacy/
-#         ttf = list(filter(lambda filepath: _os.path.basename(filepath).split('.')[0] == ttf_name, Font.system()))
-#         return ttf[0] if len(ttf) else Font.font('ARIALNB')
-
 
 def generate(
-        # text: str = Image.text, size: int = 512, fonttf=Font.font('ARIALNB'),
         text: str = Image.text, size: int = 512, fonttf=None,
         bg_color: tuple[int, int, int] = (0, 0, 0), font_color: tuple[int, int, int] = (255, 255, 255)
 ) -> Image:
@@ -91,9 +59,9 @@ def generate(
     :return:
     """
     if not fonttf:
-        from site import getsitepackages
+        from os import path
 
-        fonttf = _os.path.join(getsitepackages()[1], 'apidevtools', 'media', 'ARIALNB.TTF')
+        fonttf = path.join(path.basename(__file__), 'ARIALNB.TTF')
 
     font = _ImageFont.truetype(font=fonttf, size=int(size * 0.6))
     img = PIL.Image.new(mode='RGB', size=(size, size), color=bg_color)

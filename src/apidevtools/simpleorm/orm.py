@@ -1,15 +1,14 @@
-from loguru._logger import Logger
 from typing import Any
-import loguru
 import inspect as _inspect
 
 from ..utils import INF, is_dict as _is_dict
 from .types import RecordType, Record, Schema, Records, Relation, Instance
 from .connectors._connector import Connector
+from ..logman import LoggerManager, Logger
 
 
 class ORM:
-    def __init__(self, connector: Connector, logger: Logger = loguru.logger):
+    def __init__(self, connector: Connector, logger: Logger = LoggerManager.logger()):
         self.connector: Connector = connector
         self.logger: Logger = logger
 

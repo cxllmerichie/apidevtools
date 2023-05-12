@@ -1,8 +1,8 @@
 import asyncio
-from loguru import logger
 
 from src.apidevtools.simpleorm.connectors.mysql import MySQL
 from src.apidevtools.simpleorm import ORM
+from src.apidevtools.logman import LoggerManager
 
 from tests.orm.data import amain
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     db: ORM = ORM(
         connector=MySQL(database=DB_NAME, host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASS),
-        logger=logger
+        logger=LoggerManager.logger()
     )
 
     loop = asyncio.get_event_loop()

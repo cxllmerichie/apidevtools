@@ -1,17 +1,16 @@
 import aiomysql as _aiomysql
-from loguru._logger import Logger
 from typing import Any, MutableMapping
-import loguru
 
 from ..types import Relation
 from ._connector import Connector
+from ...logman import LoggerManager, Logger
 
 
 class MySQL(Connector):
     def __init__(self, database: str,
                  host: str = 'localhost', port: int | str = 3306,
                  user: str = 'root', password: str | None = None,
-                 logger: Logger = loguru.logger):
+                 logger: Logger = LoggerManager.logger()):
         self.database: str = database
         self.host: str = host
         self.port: str | int = port
