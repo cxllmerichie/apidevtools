@@ -3,6 +3,6 @@
 __pycache__/
 
 dist/
-src/apidevtools.egg-info/
+*.egg-info
 *.env
 *.sqlite

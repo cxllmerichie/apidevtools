@@ -1,6 +1,6 @@
+import subprocess
 import logging
 import dotenv
-import subprocess
 import tomli
 import os
 
