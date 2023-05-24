@@ -5,11 +5,7 @@ from cryptography.hazmat.primitives.hashes import SHA256 as _SHA256
 from secrets import token_bytes as _token_bytes
 from typing import Any
 
-from ..utils import evaluate as _evaluate
-
-
-# add base64 fixed
-# add compression (lz4?)
+from src.apidevtools.utils import evaluate as _evaluate
 
 
 def keygen(material: Any = None) -> bytes:
@@ -21,12 +17,14 @@ def keygen(material: Any = None) -> bytes:
 
 def encrypt(
         raw: Any,
-        key: bytes = keygen(),
+        key: bytes = None,
         masterkey: Any = None,
         authdata: Any = None
 ) -> tuple[bytes, bytes]:
     nonce = _token_bytes(12)
     authdata = str(authdata).encode() if authdata else b''
+    if not key:
+        key = keygen()
     encrypted = nonce + _AESGCM(key).encrypt(nonce, str(raw).encode(), authdata)
     if masterkey:
         key, _ = encrypt(raw=key, key=keygen(masterkey))

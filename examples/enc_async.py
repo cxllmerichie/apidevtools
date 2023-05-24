@@ -5,35 +5,33 @@ from cryptography.hazmat.primitives.hashes import SHA256 as _SHA256
 from secrets import token_bytes as _token_bytes
 from typing import Any
 
-from ..utils import evaluate as _evaluate
+from src.apidevtools.utils import evaluate as _evaluate
 
 
-# add base64 fixed
-# add compression (lz4?)
-
-
-def keygen(material: Any = None) -> bytes:
+async def keygen(material: Any = None) -> bytes:
     if not material:
         return _token_bytes(32)
     kdf = _PBKDF2HMAC(_SHA256(), 32, b'', 100000, _default_backend())
     return kdf.derive(str(material).encode())
 
 
-def encrypt(
+async def encrypt(
         raw: Any,
-        key: bytes = keygen(),
+        key: bytes = None,
         masterkey: Any = None,
         authdata: Any = None
 ) -> tuple[bytes, bytes]:
     nonce = _token_bytes(12)
     authdata = str(authdata).encode() if authdata else b''
+    if not key:
+        key = await keygen()
     encrypted = nonce + _AESGCM(key).encrypt(nonce, str(raw).encode(), authdata)
     if masterkey:
-        key, _ = encrypt(raw=key, key=keygen(masterkey))
+        key, _ = await encrypt(raw=key, key=await keygen(masterkey))
     return encrypted, key
 
 
-def decrypt(
+async def decrypt(
         encrypted: bytes,
         key: bytes,
         masterkey: Any = None,
@@ -42,7 +40,7 @@ def decrypt(
         evaluate: bool = False
 ) -> Any:
     if masterkey:
-        key = decrypt(encrypted=key, key=keygen(masterkey), evaluate=True)
+        key = await decrypt(encrypted=key, key=await keygen(masterkey), evaluate=True)
     authdata = str(authdata).encode() if authdata else b''
     decrypted = _AESGCM(key).decrypt(encrypted[:12], encrypted[12:], authdata)
     return _evaluate(decrypted, evaluate)
