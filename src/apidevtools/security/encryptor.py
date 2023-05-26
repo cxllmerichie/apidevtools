@@ -8,14 +8,14 @@ from typing import Any
 from ..utils import evaluate as _evaluate
 
 
-# add base64 fixed
-# add compression (lz4?)
-
+# add base64 ?
+# review types of `material`, `masterkey`, `authdata`, `raw`
 
 def keygen(material: Any = None) -> bytes:
     if not material:
         return _token_bytes(32)
-    kdf = _PBKDF2HMAC(_SHA256(), 32, b'', 100000, _default_backend())
+    # generates very weak password-based key, because of `salt` & `iterations`
+    kdf = _PBKDF2HMAC(_SHA256(), 32, b'', 1, _default_backend())
     return kdf.derive(str(material).encode())
 
 
@@ -23,12 +23,17 @@ def encrypt(
         raw: Any,
         key: bytes = keygen(),
         masterkey: Any = None,
-        authdata: Any = None
+        authdata: Any = None,
+        *,
+        compressed: bool = False
 ) -> tuple[bytes, bytes]:
-    nonce = _token_bytes(12)
-    authdata = str(authdata).encode() if authdata else b''
-    encrypted = nonce + _AESGCM(key).encrypt(nonce, str(raw).encode(), authdata)
-    if masterkey:
+    nonce: bytes = _token_bytes(12)
+    raw: bytes = str(raw).encode()
+    if compressed:  # compressing before to encrypt faster
+        import lz4.block as compressor
+        raw = compressor.compress(raw)
+    encrypted: bytes = nonce + _AESGCM(key).encrypt(nonce, raw, str(authdata).encode() if authdata else b'')
+    if masterkey:  # encrypting encryption key using master key
         key, _ = encrypt(raw=key, key=keygen(masterkey))
     return encrypted, key
 
@@ -39,10 +44,13 @@ def decrypt(
         masterkey: Any = None,
         authdata: Any = None,
         *,
+        compressed: bool = False,
         evaluate: bool = False
 ) -> Any:
     if masterkey:
-        key = decrypt(encrypted=key, key=keygen(masterkey), evaluate=True)
-    authdata = str(authdata).encode() if authdata else b''
-    decrypted = _AESGCM(key).decrypt(encrypted[:12], encrypted[12:], authdata)
+        key: bytes = eval(decrypt(encrypted=key, key=keygen(masterkey)))
+    decrypted: bytes = _AESGCM(key).decrypt(encrypted[:12], encrypted[12:], str(authdata).encode() if authdata else b'')
+    if compressed:
+        import lz4.block as compressor
+        decrypted = compressor.decompress(decrypted)
     return _evaluate(decrypted, evaluate)

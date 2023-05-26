@@ -4,13 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apidevtools"
-version = "3.3.2"
-authors = [
-    { name="cxllmerichie", email="cxllmerichie@gmail.com" },
-]
-maintainers = [
-    { name="cxllmerichie", email="cxllmerichie@gmail.com" },
-]
+version = "3.3.3"
+authors = [{ name="cxllmerichie", email="cxllmerichie@gmail.com" }, ]
+maintainers = [{ name="cxllmerichie", email="cxllmerichie@gmail.com" }, ]
 description = "All in one tools for API development."
 readme = "README.md"
 license = { file="LICENSE.txt" }
@@ -59,6 +55,23 @@ dependencies=[
 #    "cchardet~=2.1.7",
 #    "uvloop~=0.17.0"
 ]
+[project.optional-dependencies]
+orm = ["loguru", "pydantic"]
+redis = ["aioredis"]
+
+sqlite = ["aiosqlite"]
+mysql = ["aiomysql"]
+postgresql = ["asyncpg"]
+
+encryptor = ["cryptography"]
+compressed = ["lz4"]
+hasher = ["argon2-cffi"]
+
+imgproc = ["pillow", "numpy"]
+telegraph = ["aiohttp", "aiodns", "ujson"]
+
+speedup = ["cchardet"]
+#speedups = ["cchardet", "ujson", "aiodns", "uvloop"]
 
 [tool.setuptools.package-data]
 apidevtools = ["media/ARIALNB.TTF"]

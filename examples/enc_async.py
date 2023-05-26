@@ -22,10 +22,9 @@ async def encrypt(
         authdata: Any = None
 ) -> tuple[bytes, bytes]:
     nonce = _token_bytes(12)
-    authdata = str(authdata).encode() if authdata else b''
     if not key:
         key = await keygen()
-    encrypted = nonce + _AESGCM(key).encrypt(nonce, str(raw).encode(), authdata)
+    encrypted = nonce + _AESGCM(key).encrypt(nonce, str(raw).encode(), str(authdata).encode() if authdata else b'')
     if masterkey:
         key, _ = await encrypt(raw=key, key=await keygen(masterkey))
     return encrypted, key

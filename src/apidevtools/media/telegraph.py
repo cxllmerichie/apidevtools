@@ -2,6 +2,8 @@ import contextlib as _contextlib
 import aiohttp as _aiohttp
 import io
 
+import ujson as _json
+
 
 async def upload(file: io.BytesIO, mime: str = 'image/png') -> str | None:
     """
@@ -12,7 +14,10 @@ async def upload(file: io.BytesIO, mime: str = 'image/png') -> str | None:
     """
     data = _aiohttp.FormData(dict(name='file', value=file.read(), content_type=mime, filename=f"file.{mime.split('/')[1]}"))
     with _contextlib.suppress(_aiohttp.ClientError):
-        async with _aiohttp.ClientSession(connector=_aiohttp.TCPConnector(ssl=False)) as session:
+        async with _aiohttp.ClientSession(
+            connector=_aiohttp.TCPConnector(ssl=False),
+            json_serialize=_json.dumps
+        ) as session:
             async with session.post(url='https://telegra.ph/upload', data=data) as response:
                 sources = await response.json()
                 if not (isinstance(sources, dict) and sources.get('error')):
