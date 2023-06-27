@@ -5,10 +5,10 @@ from ..types import Relation
 
 
 class Connector:
-    def __init__(self, placeholder: str | None = '%s', constraint_wrapper: str | None = '', value_wrapper: str | None = "'"):
-        self.placeholder: str | None = placeholder
-        self.constraint_wrapper: str | None = constraint_wrapper
-        self.value_wrapper: str | None = value_wrapper
+    def __init__(self, placeholder: str = '%s', constraint_wrapper: str = '', value_wrapper: str = '\''):
+        self.placeholder: str = placeholder
+        self.constraint_wrapper: str = constraint_wrapper
+        self.value_wrapper: str = value_wrapper
 
     @abstractmethod
     async def create_pool(self) -> bool:
@@ -57,7 +57,7 @@ class Connector:
         p, c, v = self.placeholder, self.constraint_wrapper, self.value_wrapper
 
         placeholders = ', '.join([p for _ in range(len(instance.keys()))])
-        columns, values = str(tuple(instance.keys())).replace("'", v), tuple(instance.values())
+        columns, values = str(tuple(instance.keys())).replace('\'', v), tuple(instance.values())
         return f'INSERT INTO {c}{tablename}{c} {columns} VALUES ({placeholders}) RETURNING *;', values
 
     @abstractmethod

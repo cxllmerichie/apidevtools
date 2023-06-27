@@ -3,17 +3,17 @@ from typing import Any, MutableMapping
 
 from ..types import Relation
 from ._connector import Connector
-from ...logman import LoggerManager, Logger
+from ... import logman
 
 
 class SQLite(Connector):
     __memory = ':memory:'
 
     def __init__(self, database: str = ':memory:',
-                 logger: Logger = LoggerManager.logger()):
+                 logger: logman.Logger = logman.logger):
         self.database: str = database if database.endswith(('.sqlite', '.db')) or database == self.__memory else f'{database}.sqlite'
 
-        self.logger: Logger = logger
+        self.logger: logman.Logger = logger
         self.pool: _aiosqlite.Connection | None = None
 
         super().__init__(placeholder='?', constraint_wrapper="\"", value_wrapper='\'')
@@ -56,32 +56,3 @@ class SQLite(Connector):
         except Exception as error:
             self.logger.error(error)
             return []
-
-    async def _constructor__select_relations(
-            self, relation: Relation
-    ) -> tuple[str, tuple[Any, ...]]:
-        return await super()._constructor__select_relations(relation)
-
-    async def _constructor__select_instances(
-            self,
-            instance: dict[str, Any], tablename: str
-    ) -> tuple[str, tuple[Any, ...]]:
-        return await super()._constructor__select_instances(instance, tablename)
-
-    async def _constructor__insert_instance(
-            self,
-            instance: dict[str, Any], tablename: str
-    ) -> tuple[str, tuple[Any, ...]]:
-        return await super()._constructor__insert_instance(instance, tablename)
-
-    async def _constructor__update_instances(
-            self,
-            instance: dict[str, Any], tablename: str, where: dict[str, Any]
-    ) -> tuple[str, tuple[Any, ...]]:
-        return await super()._constructor__update_instances(instance, tablename, where)
-
-    async def _constructor__delete_instances(
-            self,
-            instance: dict[str, Any], tablename: str
-    ) -> tuple[str, tuple[Any, ...]]:
-        return await super()._constructor__delete_instances(instance, tablename)

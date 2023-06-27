@@ -4,13 +4,13 @@ import inspect as _inspect
 from ..utils import INF, is_dict as _is_dict
 from .types import RecordType, Record, Schema, Records, Relation, Instance
 from .connectors._connector import Connector
-from ..logman import LoggerManager, Logger
+from .. import logman
 
 
 class ORM:
-    def __init__(self, connector: Connector, logger: Logger = LoggerManager.logger()):
+    def __init__(self, connector: Connector, logger: logman.Logger = logman.logger):
         self.connector: Connector = connector
-        self.logger: Logger = logger
+        self.logger: logman.Logger = logger
 
     async def create_pool(self) -> bool:
         try:

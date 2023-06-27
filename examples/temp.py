@@ -1,25 +1,31 @@
-def t():
-    ...
+import asyncio
 
-from = t
-
-class test:
-    async def select(self):
-        ...
-
-    def from():
-        ...
+from src.apidevtools.orm import ORM, connector
 
 
-id_ = 1
-res = (await db.select('*')
-       .from_table('mytest')
-       .where(dict(id=id_))
-       .order_by('id')
-       .limit(100)
-       .offset(50))
-
-format = ''
+orm = ORM(
+    connector=connector.PostgreSQL(
+        database='database', user='postgres', password='password', host='localhost', port=5432
+    )
+)
 
 
-res = await db.select('*').table('mytest').where(dict(id=1)).order_by('id').limit(100).offset(50)
+async def amain():
+    await orm.create_pool()
+
+    await orm.select('column1', 'column2').fr0m('tablename').where(column3=3).order(column1='asc', column2='desc').limit(5).offset(3).all()
+    print(orm._query)
+    orm.update('tablename').set(column1='value1', column2='value2').where(column3=3)
+    print(orm._query)
+    orm.insert().into('table').values(column1='value1', column2='value2').returning(type=dict)
+    print(orm._query)
+    orm.insert().into('table').values('value1', 'value2')
+    print(orm._query)
+    orm.insert('instance')
+    print(orm._query)
+    orm.delete().fr0m('table').where(column1='value1')
+    print(orm._query)
+
+
+if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(amain())
