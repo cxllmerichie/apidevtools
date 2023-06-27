@@ -1,8 +1,27 @@
+from pydantic import BaseModel
+from abc import abstractmethod as _abstractmethod, ABC
 from typing import MutableMapping, Any, Coroutine, Iterator
 from contextlib import suppress as _suppress
 
-from .schema import Schema
 from ...utils import is_dict as _is_dict
+from ._operations import Insert, Select, Update, Delete
+
+
+class CRUD(Insert, Select, Update, Delete):
+    ...
+
+
+class Schema(BaseModel, ABC):
+    @property
+    @_abstractmethod
+    def __tablename__(self) -> str:
+        ...
+
+    async def into_db(self) -> 'Schema':
+        return self
+
+    async def from_db(self) -> 'Schema':
+        return self
 
 
 Instance = dict[str, Any] | Schema
@@ -52,27 +71,3 @@ class Records:
             return await self._unwrap(self._records[-1])
         except IndexError:
             return None
-
-    def limit(self, length: int) -> 'Records':
-        with _suppress(IndexError):
-            self._records = self._records[:length]
-        return self
-
-    def offset(self, length: int) -> 'Records':
-        with _suppress(IndexError):
-            self._records = self._records[length:]
-        return self
-
-    def order_by(self, columns: str | list[str], direction: str = 'ASC') -> 'Records':
-        columns = columns if isinstance(columns, list) else [columns]
-
-        def keys(record) -> tuple[str, ...]:
-            if not isinstance(record, dict):
-                record = dict(record)
-            return tuple([record[column] for column in columns])
-        self._records = sorted(
-            self._records,
-            key=columns if isinstance(columns, str) else keys,
-            reverse=(direction.upper() == 'DESC')
-        )
-        return self

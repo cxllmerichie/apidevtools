@@ -3,21 +3,21 @@ from typing import Any, MutableMapping
 
 from ..types import Relation
 from ._connector import Connector
-from ...logman import LoggerManager, Logger
+from ... import logman
 
 
 class PostgreSQL(Connector):
     def __init__(self, database: str,
                  host: str = 'localhost', port: int | str = 5432,
                  user: str = 'postgres', password: str | None = None,
-                 logger: Logger = LoggerManager.logger()):
+                 logger: logman.Logger = logman.logger):
         self.database: str = database
         self.host: str = host
         self.port: str | int = port
         self.user: str = user
         self.password: str | None = password
 
-        self.logger: Logger = logger
+        self.logger: logman.Logger = logger
         self.pool: _asyncpg.pool.Pool | None = None
 
         super().__init__(None, None, None)

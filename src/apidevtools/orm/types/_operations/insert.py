@@ -4,12 +4,13 @@ from ._operation import Operation
 
 
 class Insert(Operation):
-    def __init__(self, instance=None):
+    def insert(self, instance=None) -> 'Insert':
         self._refresh()
 
         if instance:
             ...
         self._query = 'INSERT '
+        return self
 
     def into(self, table: str) -> 'Insert':
         self._query += f"INTO {table} "
@@ -20,5 +21,7 @@ class Insert(Operation):
         # if columns:
         #     self._query += f"({', '.join(columns.keys())}) "
         #     values = columns.values()
-        self._query += f"VALUES {', '.join(values)} "
+        placeholders = ', '.join([self._placeholder for i in range(len(values))])
+        self._qargs += values
+        self._query += f"VALUES ({placeholders}) "
         return self

@@ -4,11 +4,12 @@ from ._operation import Operation
 
 
 class Update(Operation):
-    def __init__(self, table: str, instance=None):
+    def update(self, table: str, instance=None) -> 'Update':
         self._refresh()
         if instance:
             ...
         self._query = f"UPDATE {table} "
+        return self
 
     def set(self, **values: Any) -> 'Update':
         values = ', '.join([f'{key} = {value}' for key, value in values.items()])

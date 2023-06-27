@@ -3,17 +3,17 @@ from typing import Any, MutableMapping
 
 from ..types import Relation
 from ._connector import Connector
-from ...logman import LoggerManager, Logger
+from ... import logman
 
 
 class SQLite(Connector):
     __memory = ':memory:'
 
     def __init__(self, database: str = ':memory:',
-                 logger: Logger = LoggerManager.logger()):
+                 logger: logman.Logger = logman.logger):
         self.database: str = database if database.endswith(('.sqlite', '.db')) or database == self.__memory else f'{database}.sqlite'
 
-        self.logger: Logger = logger
+        self.logger: logman.Logger = logger
         self.pool: _aiosqlite.Connection | None = None
 
         super().__init__(placeholder='?', constraint_wrapper="\"", value_wrapper='\'')

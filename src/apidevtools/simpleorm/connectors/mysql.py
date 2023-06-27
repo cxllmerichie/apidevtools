@@ -3,21 +3,21 @@ from typing import Any, MutableMapping
 
 from ..types import Relation
 from ._connector import Connector
-from ...logman import LoggerManager, Logger
+from ... import logman
 
 
 class MySQL(Connector):
     def __init__(self, database: str,
                  host: str = 'localhost', port: int | str = 3306,
                  user: str = 'root', password: str | None = None,
-                 logger: Logger = LoggerManager.logger()):
+                 logger: logman.Logger = logman.logger):
         self.database: str = database
         self.host: str = host
         self.port: str | int = port
         self.user: str = user
         self.password: str | None = password
 
-        self.logger: Logger = logger
+        self.logger: logman.Logger = logger
         self.pool: _aiomysql.Pool | None = None
 
         super().__init__(placeholder='%s', constraint_wrapper='`', value_wrapper="'")

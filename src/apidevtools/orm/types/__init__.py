@@ -1,2 +1,2 @@
-from .schema import Schema, Relation
-from .records import Records, RecordType, Record, Instance
+from .types import Schema, Records, RecordType, Record, Instance, CRUD
+from ._connector import Connector
