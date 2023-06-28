@@ -3,7 +3,9 @@ import asyncio
 import time
 import os
 
-from src.apidevtools import orm
+from src.apidevtools.orm.mysql import MySQL
+from src.apidevtools.orm.postgresql import PostgreSQL
+from src.apidevtools.orm.sqlite import SQLite
 from src.apidevtools.orm.types import Schema
 
 
@@ -27,7 +29,7 @@ async def main(db):
             column2 text
         );
     ''')
-    for i in range(1000):
+    for i in range(10):
         record = await db.insert().into('tablename').values(f'column1_{i}', f'column2_{i}').one(Record)
     async for record in db.records('SELECT * FROM tablename;'):
         ...
@@ -45,19 +47,19 @@ async def main(db):
 
 if __name__ == '__main__':
     for db in [
-        orm.postgresql.PostgreSQL(
+        PostgreSQL(
             database=os.getenv('POSTGRES_DB'),
             user=os.getenv('POSTGRES_USER'), password=os.getenv('POSTGRES_PASS'),
             host=os.getenv('POSTGRES_HOST'), port=int(os.getenv('POSTGRES_PORT')),
         ),
-        orm.mysql.MySQL(
+        MySQL(
             database=os.getenv('MYSQL_DB'),
             user=os.getenv('MYSQL_USER'), password=os.getenv('MYSQL_PASS'),
             host=os.getenv('MYSQL_HOST'), port=int(os.getenv('MYSQL_PORT')),
         ),
-        orm.sqlite.SQLite(
+        SQLite(
             database='sqlite.db'
         ),
-        orm.sqlite.SQLite()
+        SQLite()
     ]:
         asyncio.new_event_loop().run_until_complete(main(db))

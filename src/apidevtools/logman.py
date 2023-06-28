@@ -4,9 +4,9 @@ import sys as _sys
 import os as _os
 
 
-format = '{level.icon} <yellow>|</yellow> ' \
+format = '<level>{level.icon} {level.name}</level> <yellow>|</yellow> ' \
           '<blue>{time:YYYY-MM-DD HH:mm:ss}</blue> <yellow>|</yellow> ' \
-          '<level>{level.name} (<cyan>{name}</cyan>:<cyan>{function}</cyan>) - {message}</level>'
+          '<level><cyan>{name}</cyan>:<cyan>{function}</cyan> - {message}</level>'
 logger.configure(handlers=[{'sink': _sys.stderr, 'format': format}])
 
 
