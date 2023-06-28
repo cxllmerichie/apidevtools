@@ -1,7 +1,6 @@
-from src.apidevtools.logman import LoggerManager
+from src.apidevtools import logman
 
 
-LOGMAN = LoggerManager()
-LOGGER = LOGMAN.add('main.log')
+LOGGER = logman.add('main.log')
 
 LOGGER.warning('test')

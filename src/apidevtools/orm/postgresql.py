@@ -1,15 +1,13 @@
-from typing import Any, MutableMapping, Optional, AsyncGenerator
+from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
 from functools import cache
 import asyncpg
 
-from .types import CRUD, Connector
+from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Schema, Query, Operation
 from .. import logman
 
 
-class PostgreSQL(Connector, CRUD):
+class PostgreSQL(Connector, Insert, Select, Update, Delete):
     _placeholder_count: int = 0
-    _constraint_wrapper = ''
-    _value_wrapper = '\''
 
     def __init__(self, database: str,
                  host: str = 'localhost', port: int | str = 5432,
@@ -50,45 +48,55 @@ class PostgreSQL(Connector, CRUD):
     #     query, args = 'SELECT "column_name" FROM "information_schema"."columns" WHERE "table_name" = $1;', (tablename,)
     #     async with self.pool.acquire() as connection:
     #         return [dict(record)['column_name'] for record in await connection.fetch(query, *args)]
+    #
+    # def __aiter__(self) -> 'PostgreSQL':
+    #     self._records = self.records(self._query, self._qargs, self._type)
+    #     return self
+    #
+    # async def __anext__(self) -> Record:
+    #     try:
+    #         return next(self._records)
+    #     except StopIteration:
+    #         raise StopAsyncIteration
 
-    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
+    async def execute(self, query: Query, args: tuple[Any, ...] = ()) -> bool:
+        query, args, _, _ = await self._parameters(query, args, None)
         try:
             async with self.pool.acquire() as connection:
-                return await connection.execute(query, *args)
+                await connection.execute(query, *args)
+            return True
         except Exception as error:
             self.logger.error(error)
+            return False
 
-    async def fetchall(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict)\
-            -> list[MutableMapping]:
-        try:
-            return [row async for row in self.rows(query, args, type)]
-            # async with self.pool.acquire() as connection:
-            #     row = await connection.fetch(query, *args)
-            #     return type(**dict(row))
-        except Exception as error:
-            self.logger.error(error)
-            return []
-
-    async def fetchone(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict)\
-            -> Optional[MutableMapping]:
+    async def fetchone(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> Optional[Record]:
+        query, args, type, unwrap = await self._parameters(query, args, type)
         try:
             async with self.pool.acquire() as connection:
-                row = await connection.fetchrow(query, *args)
-                return type(**dict(row))
+                if record := await connection.fetchrow(query, *args):
+                    return await unwrap(record, type)
         except Exception as error:
             self.logger.error(error)
             return None
 
-    async def rows(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict)\
-            -> AsyncGenerator[dict[str, Any], None]:
+    async def records(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> AsyncGenerator[Record, None]:
+        query, args, type, unwrap = await self._parameters(query, args, type)
         try:
             async with self.pool.acquire() as connection:
                 async with connection.transaction() as transaction:
-                    async for row in connection.cursor(query, *args):
-                        yield type(**dict(row))
+                    async for record in connection.cursor(query, *args):
+                        yield await unwrap(record, type)
         except Exception as error:
             self.logger.error(error)
-            pass
+
+    def _unwrapper(self, type: RecordType) -> Callable[[Any, RecordType], Awaitable[Record]]:
+        async def to_dict(record: Any, _: RecordType) -> dict[str, Any]:
+            return dict(record)
+
+        async def to_schema(record: Any, type: RecordType) -> Schema:
+            return await type(**dict(record)).from_db()
+
+        return to_dict if type is dict else to_schema
 
     @property
     def _placeholder(self):

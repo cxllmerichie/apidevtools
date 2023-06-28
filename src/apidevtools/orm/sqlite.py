@@ -1,16 +1,15 @@
-from typing import Any, MutableMapping, Optional, AsyncGenerator
+from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
 from functools import cache
 import aiosqlite
 
-from .types import CRUD, Connector
+from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Query, Schema
 from .. import logman
 
 
-class SQLite(Connector, CRUD):
-    __memory = ':memory:'
+class SQLite(Connector, Insert, Select, Update, Delete):
     _placeholder = '?'
-    _constraint_wrapper = "\""
-    _value_wrapper = '\''
+
+    __memory = ':memory:'
 
     def __init__(self, database: str = ':memory:',
                  logger: logman.Logger = logman.logger):
@@ -43,8 +42,8 @@ class SQLite(Connector, CRUD):
     #     cursor: aiosqlite.Cursor = await self.pool.execute(f'SELECT * FROM {tablename}')
     #     return list(map(lambda x: x[0], cursor.description))
 
-    async def execute(self, query: str, args: tuple[Any, ...] = ())\
-            -> bool:
+    async def execute(self, query: Query, args: tuple[Any, ...] = ()) -> bool:
+        query, args, _, _ = await self._parameters(query, args, None)
         try:
             await self.pool.execute(query, args) if len(args) else await self.pool.executescript(query)
             await self.pool.commit()
@@ -53,35 +52,32 @@ class SQLite(Connector, CRUD):
             self.logger.error(error)
             return False
 
-    async def fetchall(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict)\
-            -> list[MutableMapping]:
+    async def fetchone(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> Optional[Record]:
+        query, args, type, unwrap = await self._parameters(query, args, type)
         try:
             cursor: aiosqlite.Cursor = await self.pool.execute(query, args)
+            record = await cursor.fetchone()
             await self.pool.commit()
-            return [dict(row) for row in await cursor.fetchall()]
-        except Exception as error:
-            self.logger.error(error)
-            return []
-
-    async def fetchone(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict)\
-            -> Optional[MutableMapping]:
-        try:
-            cursor: aiosqlite.Cursor = await self.pool.execute(query, args)
-            await self.pool.commit()
-            return await cursor.fetchone()
+            return await unwrap(record, type)
         except Exception as error:
             self.logger.error(error)
             return None
 
-    async def rows(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict) \
-            -> AsyncGenerator[dict[str, Any], None]:
+    async def records(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> AsyncGenerator[Record, None]:
+        query, args, type, unwrap = await self._parameters(query, args, type)
         try:
             cursor: aiosqlite.Cursor = await self.pool.execute(query, args)
-            while True:
-                if item := await cursor.fetchone():
-                    yield dict(item)
-                else:
-                    break
+            await self.pool.commit()
+            while record := await cursor.fetchone():
+                yield await unwrap(record, type)
         except Exception as error:
             self.logger.error(error)
-            pass
+
+    def _unwrapper(self, type: RecordType) -> Callable[[Any, RecordType], Awaitable[Record]]:
+        async def to_dict(record: Any, _: RecordType) -> dict[str, Any]:
+            return dict(record) if record else None
+
+        async def to_schema(record: Any, type: RecordType) -> Schema:
+            return await type(**dict(record)).from_db() if record else None
+
+        return to_dict if type is dict else to_schema

@@ -1,5 +1,9 @@
-from typing import Any, MutableMapping, Optional, AsyncGenerator
+from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
 from abc import abstractmethod
+
+from .types import RecordType, Record
+from ._operations import Operation
+from ._operations import Query
 
 
 class Connector:
@@ -20,17 +24,40 @@ class Connector:
     #     ...
 
     @abstractmethod
-    async def execute(self, query: str, args: tuple[Any, ...] = ()) -> Any:
+    def __aiter__(self):
+        return self.records(f'{self._query[:-1]};', self._qargs, self._type)  # noqa
+
+    @abstractmethod
+    def __anext__(self) -> Record:
+        try:
+            return anext(self)
+        except StopIteration:
+            raise StopAsyncIteration
+
+    @abstractmethod
+    def _unwrapper(self, type: RecordType) -> Callable[[Any, RecordType], Awaitable[Record]]:
+        ...
+
+    async def _parameters(self, query: Query, args: tuple[Any, ...], type: RecordType):
+        if isinstance(query, Operation):
+            query, args, type = f'{self._query[:-1]};', self._qargs, self._type  # noqa
+        return query, args, type, self._unwrapper(type)
+
+    @abstractmethod
+    async def execute(self, query: Query, args: tuple[Any, ...] = ()) -> bool:
+        ...
+
+    async def fetchall(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> list[Record]:
+        try:
+            return [record async for record in self.records(query, args, type)]  # noqa
+        except Exception as error:
+            self.logger.error(error)  # noqa
+            return []
+
+    @abstractmethod
+    async def fetchone(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> Optional[Record]:
         ...
 
     @abstractmethod
-    async def fetchall(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict) -> list[MutableMapping]:
-        ...
-
-    @abstractmethod
-    async def fetchone(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict) -> Optional[MutableMapping]:
-        ...
-
-    @abstractmethod
-    async def rows(self, query: str, args: tuple[Any, ...] = (), type: type[dict] = dict) -> AsyncGenerator[dict[str, Any], None]:
+    async def records(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> AsyncGenerator[Record, None]:
         ...

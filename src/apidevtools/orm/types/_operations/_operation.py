@@ -1,6 +1,6 @@
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
-# from src.apidevtools.orm.types import Schema
+from ..types import RecordType, Record
 
 
 class Operation:
@@ -33,13 +33,27 @@ class Operation:
         self._query += f"OFFSET {value} "
         return self
 
-    # def returning(self, *columns, type: type[dict | Schema] = dict) -> 'Operation':
-    def returning(self, *columns, type: type[dict] = dict) -> 'Operation':
+    def returning(self, *columns, type: RecordType = dict) -> 'Operation':
         if type:
             self._type = type
         if columns:
             self._query += f"RETURNING {', '.join(columns)} "
         return self
+
+    async def all(self, type: RecordType = dict) -> list[Record]:
+        if not (query := self._query.lower()).startswith('select'):
+            if 'returning' not in query:
+                self.returning('*')
+        return await self.fetchall(f'{self._query[:-1]};', tuple(self._qargs), type)
+
+    async def one(self, type: RecordType = dict) -> Optional[Record]:
+        if not (query := self._query.lower()).startswith('select'):
+            if 'returning' not in query:
+                self.returning('*')
+        return await self.fetchone(f'{self._query[:-1]};', tuple(self._qargs), type)
+
+    async def exec(self) -> bool:
+        return await self.execute(f'{self._query[:-1]};', tuple(self._qargs))
 
     def _refresh(self):
         self._qargs = []
@@ -49,36 +63,5 @@ class Operation:
         except AttributeError:
             ...
 
-    def __enter__(self):
-        return self.rows(self._query, self._qargs, self._type)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        ...
-
-    async def all(self, type: type[dict] = dict):
-        if not (query := self._query.lower()).startswith('select'):
-            if 'returning' not in query:
-                self.returning('*')
-        return await self.fetchall(f'{self._query[:-1]};', tuple(self._qargs), type)
-
-    async def one(self, type: type[dict] = dict):
-        if not (query := self._query.lower()).startswith('select'):
-            if 'returning' not in query:
-                self.returning('*')
-        return await self.fetchone(f'{self._query[:-1]};', tuple(self._qargs), type)
-
-    async def exec(self):
-        return await self.execute(f'{self._query[:-1]};', tuple(self._qargs))
-
-    #
-    # async def first(self) -> Record:
-    #     try:
-    #         return await self._unwrap(self._records[0])
-    #     except IndexError:
-    #         return None
-    #
-    # async def last(self) -> Record:
-    #     try:
-    #         return await self._unwrap(self._records[-1])
-    #     except IndexError:
-    #         return None
+Query: type = type[str | Operation]
