@@ -44,16 +44,16 @@ class Operation:
         # if not (query := self._query.lower()).startswith('select'):
         #     if 'returning' not in query:
         #         self.returning('*')
-        return await self.fetchall(f'{self._query[:-1]};', tuple(self._qargs), type)
+        return await self.fetchall(f'{self._query[:-1]};', tuple(self._qargs), type)  # noqa
 
     async def one(self, type: RecordType = dict) -> Optional[Record]:
         # if not (query := self._query.lower()).startswith('select'):
         #     if 'returning' not in query:
         #         self.returning('*')
-        return await self.fetchone(f'{self._query[:-1]};', tuple(self._qargs), type)
+        return await self.fetchone(f'{self._query[:-1]};', tuple(self._qargs), type)  # noqa
 
     async def exec(self) -> bool:
-        return await self.execute(f'{self._query[:-1]};', tuple(self._qargs))
+        return await self.execute(f'{self._query[:-1]};', tuple(self._qargs))  # noqa
 
     def _refresh(self):
         self._qargs = []
