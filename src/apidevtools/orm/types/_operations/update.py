@@ -5,16 +5,17 @@ from ..types import Schema, Record
 
 
 class Update(Operation):
-    def update(self, table: str, instance: Record = None) -> 'Update':
+    def update(self, what: Record | str) -> 'Update':
         self._refresh()
-        if instance:
-            if isinstance(instance, Schema):
-                self.update(instance.__tablename__)
-                self.set(**dict(instance))
-                key = instance.__primary__
-                self.where(**{key: instance.__getattribute__(key)})
-            return self
-        self._query = f"UPDATE {table} "
+        if isinstance(what, Schema):
+            self.update(what.__tablename__)
+            self.set(**dict(what))
+            key = what.__primary__
+            self.where(**{key: what.__getattribute__(key)})
+        elif isinstance(what, dict):
+            ...
+        elif isinstance(what, str):
+            self._query = f"UPDATE {what} "
         return self
 
     def set(self, **values: Any) -> 'Update':
