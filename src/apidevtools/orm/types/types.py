@@ -9,6 +9,11 @@ class Schema(BaseModel, ABC):
     def __tablename__(self) -> str:
         ...
 
+    @property
+    @_abstractmethod
+    def __primary__(self) -> str:
+        ...
+
     async def into_db(self) -> 'Schema':
         return self
 
@@ -17,4 +22,4 @@ class Schema(BaseModel, ABC):
 
 
 Record = dict[str, Any] | Schema
-RecordType = type[dict[str, Any] | Schema]
+RecordType = type[Record]

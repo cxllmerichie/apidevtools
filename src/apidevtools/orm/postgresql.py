@@ -27,7 +27,7 @@ class PostgreSQL(Connector, Insert, Select, Update, Delete):
             self.pool = await asyncpg.pool.create_pool(
                 database=self.database, host=self.host, port=self.port, user=self.user, password=self.password
             )
-            self.logger.info(f'`ORM.connector: {self.__class__.__name__}` pool created')
+            self.logger.info(f'{self.__class__.__name__} pool created')
             return True
         except Exception as error:
             self.logger.error(error)
@@ -37,7 +37,7 @@ class PostgreSQL(Connector, Insert, Select, Update, Delete):
         try:
             await self.pool.expire_connections()
             await self.pool.close()
-            self.logger.info(f'`ORM.connector: {self.__class__.__name__}` pool created')
+            self.logger.info(f'{self.__class__.__name__} pool created')
             return True
         except AttributeError:
             self.logger.error(f'Attempting to close not acquired pool')

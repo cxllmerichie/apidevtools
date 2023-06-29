@@ -27,7 +27,7 @@ class MySQL(Connector, Insert, Select, Update, Delete):
             self.pool = await aiomysql.create_pool(
                 db=self.database, host=self.host, port=self.port, user=self.user, password=self.password
             )
-            self.logger.info(f'`ORM.connector: {self.__class__.__name__}` pool created')
+            self.logger.info(f'{self.__class__.__name__} pool created')
             return True
         except Exception as error:
             self.logger.error(error)
@@ -36,7 +36,7 @@ class MySQL(Connector, Insert, Select, Update, Delete):
     async def close_pool(self) -> bool:
         try:
             self.pool.close()
-            self.logger.info(f'`ORM.connector: {self.__class__.__name__}` pool closed')
+            self.logger.info(f'{self.__class__.__name__} pool closed')
             return True
         except Exception as error:
             self.logger.error(error)

@@ -22,7 +22,7 @@ class SQLite(Connector, Insert, Select, Update, Delete):
         try:
             self.pool = await aiosqlite.connect(database=self.database)
             self.pool.row_factory = aiosqlite.Row
-            self.logger.info(f'`ORM.connector: {self.__class__.__name__}` pool created')
+            self.logger.info(f'{self.__class__.__name__} pool created')
             return True
         except Exception as error:
             self.logger.error(error)
@@ -31,7 +31,7 @@ class SQLite(Connector, Insert, Select, Update, Delete):
     async def close_pool(self) -> bool:
         try:
             await self.pool.close()
-            self.logger.info(f'`ORM.connector: {self.__class__.__name__}` pool closed')
+            self.logger.info(f'{self.__class__.__name__} pool closed')
             return True
         except Exception as error:
             self.logger.error(error)
