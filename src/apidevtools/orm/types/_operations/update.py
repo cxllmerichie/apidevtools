@@ -18,6 +18,8 @@ class Update(Operation):
         return self
 
     def set(self, **values: Any) -> 'Update':
-        values = ', '.join([f'{key} = {value}' for key, value in values.items()])
+        self._qargs += values.values()
+        p, c = self._placeholder, self._constraint_wrapper  # noqa
+        values = ', '.join([f'{c}{key}{c} = {p}' for key, value in values.items()])
         self._query += f"SET {values} "
         return self

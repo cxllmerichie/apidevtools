@@ -7,7 +7,7 @@ class Select(Operation):
     def select(self, *columns: str) -> 'Select':
         self._refresh()
 
-        c = self._constraint_wrapper
+        c = self._constraint_wrapper  # noqa
         _columns = ''
         for column in columns:
             _columns += f'{c}{column}{c}, '

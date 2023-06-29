@@ -9,13 +9,13 @@ class Operation:
     _type: type
 
     def fr0m(self, table: str) -> 'Operation':
-        c = self._constraint_wrapper
+        c = self._constraint_wrapper  # noqa
         self._query += f"FROM {c}{table}{c} "
         return self
 
     def where(self, **conditions: Any) -> 'Operation':
         self._qargs += conditions.values()
-        p, c = self._placeholder, self._constraint_wrapper
+        p, c = self._placeholder, self._constraint_wrapper  # noqa
         conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key, value in conditions.items()])
         self._query += f"WHERE {conditions} "
         return self
@@ -41,15 +41,15 @@ class Operation:
         return self
 
     async def all(self, type: RecordType = dict) -> list[Record]:
-        if not (query := self._query.lower()).startswith('select'):
-            if 'returning' not in query:
-                self.returning('*')
+        # if not (query := self._query.lower()).startswith('select'):
+        #     if 'returning' not in query:
+        #         self.returning('*')
         return await self.fetchall(f'{self._query[:-1]};', tuple(self._qargs), type)
 
     async def one(self, type: RecordType = dict) -> Optional[Record]:
-        if not (query := self._query.lower()).startswith('select'):
-            if 'returning' not in query:
-                self.returning('*')
+        # if not (query := self._query.lower()).startswith('select'):
+        #     if 'returning' not in query:
+        #         self.returning('*')
         return await self.fetchone(f'{self._query[:-1]};', tuple(self._qargs), type)
 
     async def exec(self) -> bool:
