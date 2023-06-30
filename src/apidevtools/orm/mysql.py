@@ -100,6 +100,10 @@ class MySQL(Connector, Insert, Select, Update, Delete):
     def returning(self, *columns: str, type: RecordType = Dict[str, Any], auto: bool = False) -> Operation:
         super().returning(*columns, type=type, auto=auto)
         if all([stmt in self._commands.keys() for stmt in ['update', 'returning']]):
-            tablename = self._commands['update'].split(' ')[1]
-            self._commands['returning'] = f'; SELECT * FROM {tablename} LIMIT ROW_COUNT() OFFSET LAST_INSERT_ID() - ROW_COUNT();'
+            print(self._commands)
+            self.into(self._commands['update'].split(' ')[1])
+            self._commands['replace'] = 'REPLACE'
+            self._commands['set'] += self._commands['where'].replace('WHERE ', ', ')
+            self._commands.pop('where')
+            self._commands.pop('update')
         return self

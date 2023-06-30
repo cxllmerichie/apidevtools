@@ -5,7 +5,7 @@ from ..types import RecordType, Record
 
 class Operation:
     _mapping: dict[str, int] = {
-        'insert': 1, 'select': 1, 'update': 1, 'delete': 1,
+        'insert': 1, 'select': 1, 'update': 1, 'delete': 1, 'replace': 1,
         'from': 2, 'into': 2,
         'columns': 3,
         'values': 4, 'set': 4,
@@ -54,7 +54,7 @@ class Operation:
         if columns:
             self._commands['returning'] = f"RETURNING {', '.join(columns)}"
         if auto and not self._commands.get('returning'):
-            if any([stmt in self._commands.keys() for stmt in ['insert', 'select', 'update', 'delete']]):
+            if any([stmt in self._commands.keys() for stmt in ['insert', 'update', 'delete']]):
                 self.returning('*')
         return self
 

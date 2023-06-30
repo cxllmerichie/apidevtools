@@ -1,4 +1,5 @@
 from typing import Any
+from contextlib import suppress
 
 from ._operation import Operation
 from ..types import Schema
@@ -9,7 +10,8 @@ class Update(Operation):
         if isinstance(what, Schema):
             self._commands['update'] = f"UPDATE {what.__tablename__}"
             self.set(**{key: value for key, value in dict(what).items() if key != (primary := what.__primary__)})
-            self.where(**{primary: what.__getattribute__(primary)})
+            with suppress(AttributeError):
+                self.where(**{primary: what.__getattribute__(primary)})
         elif isinstance(what, str):
             self._commands['update'] = f"UPDATE {what}"
         return self

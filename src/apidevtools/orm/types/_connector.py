@@ -65,11 +65,9 @@ class Connector:
             commands = {self._mapping[key]: self._commands[key] for key, value in self._commands.items()}  # noqa
             query = f"{' '.join([commands[key] for key in sorted(commands.keys())])};"  # noqa
             args = copy(self._args)  # noqa
-
         self._commands.clear()  # noqa
         self._args.clear()  # noqa
         self._type = Dict[str, Any]
         with suppress(AttributeError):
             self._placeholder_count = 0
-
         return query, args, type, self._unwrapper(type)
