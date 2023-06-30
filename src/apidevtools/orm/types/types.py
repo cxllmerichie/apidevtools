@@ -1,6 +1,6 @@
 from abc import abstractmethod as _abstractmethod, ABC
 from pydantic import BaseModel
-from typing import Any
+from typing import Any, Dict
 
 
 class Schema(BaseModel, ABC):
@@ -21,5 +21,5 @@ class Schema(BaseModel, ABC):
         return self
 
 
-Record = dict[str, Any] | Schema
+Record = Dict[str, Any] | Schema
 RecordType = type[Record]

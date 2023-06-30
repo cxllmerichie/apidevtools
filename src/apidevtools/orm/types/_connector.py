@@ -1,5 +1,5 @@
 from contextlib import suppress
-from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
+from typing import Any, Optional, AsyncGenerator, Callable, Awaitable, Dict
 from abc import abstractmethod
 from copy import copy
 
@@ -68,7 +68,7 @@ class Connector:
 
         self._commands.clear()  # noqa
         self._args.clear()  # noqa
-        self._type = dict
+        self._type = Dict[str, Any]
         with suppress(AttributeError):
             self._placeholder_count = 0
 

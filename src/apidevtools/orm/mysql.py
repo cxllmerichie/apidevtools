@@ -1,8 +1,8 @@
-from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
+from typing import Any, Optional, AsyncGenerator, Callable, Awaitable, Dict
 from functools import cache
 import aiomysql
 
-from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Query, Schema
+from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Query, Schema, Operation
 from .. import logman
 
 
@@ -96,3 +96,10 @@ class MySQL(Connector, Insert, Select, Update, Delete):
             return await type(**record).from_db()
 
         return to_dict if type is dict else to_schema
+
+    def returning(self, *columns: str, type: RecordType = Dict[str, Any], auto: bool = False) -> Operation:
+        super().returning(*columns, type=type, auto=auto)
+        if all([stmt in self._commands.keys() for stmt in ['update', 'returning']]):
+            tablename = self._commands['update'].split(' ')[1]
+            self._commands['returning'] = f'; SELECT * FROM {tablename} LIMIT ROW_COUNT() OFFSET LAST_INSERT_ID() - ROW_COUNT();'
+        return self
