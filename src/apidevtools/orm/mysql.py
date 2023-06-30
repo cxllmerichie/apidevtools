@@ -100,7 +100,6 @@ class MySQL(Connector, Insert, Select, Update, Delete):
     def returning(self, *columns: str, type: RecordType = Dict[str, Any], auto: bool = False) -> Operation:
         super().returning(*columns, type=type, auto=auto)
         if all([stmt in self._commands.keys() for stmt in ['update', 'returning']]):
-            print(self._commands)
             self.into(self._commands['update'].split(' ')[1])
             self._commands['replace'] = 'REPLACE'
             self._commands['set'] += self._commands['where'].replace('WHERE ', ', ')
