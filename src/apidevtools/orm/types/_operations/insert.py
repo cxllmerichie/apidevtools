@@ -9,11 +9,7 @@ class Insert(Operation):
         self._commands['insert'] = 'INSERT'
         if record:
             if isinstance(record, list):
-                for instance in record:
-                    if isinstance(instance, Schema):
-                        self.into(instance.__tablename__)
-                        instance = dict(instance)
-                    self.values(**instance)
+                self.insert(record)
             elif isinstance(record, Schema):
                 self.into(record.__tablename__)
                 self.values(**dict(record))
@@ -25,13 +21,12 @@ class Insert(Operation):
         self._commands['into'] = f"INTO {table}"
         return self
 
-    def values(self, *values: Any, **columns: Any) -> 'Insert':
-        if columns:
-            self._commands['columns'] = f"({', '.join(columns.keys())})"
-            values = columns.values()
-        if self._commands.get('values'):
-            self._commands['values'] += f"'\b, '({', '.join(columns.keys())})"
-        self._args += values
+    def values(self, **columns: Any) -> 'Insert':
+        self._commands['columns'] = f"({', '.join(columns.keys())})"
+        self._args += (values := columns.values())
         placeholders = ', '.join([self._placeholder for i in range(len(values))])  # noqa
-        self._commands['values'] = f"VALUES ({placeholders})"
+        if self._commands.get('values'):
+            self._commands['values'] += f", ({placeholders})"
+        else:
+            self._commands['values'] = f"VALUES ({placeholders})"
         return self
