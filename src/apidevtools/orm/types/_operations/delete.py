@@ -3,15 +3,13 @@ from ..types import Schema, Record
 
 
 class Delete(Operation):
-    def delete(self, instance: Record = None) -> 'Delete':
-        self._refresh()
-
-        if isinstance(instance, Schema):
-            self.fr0m(instance.__tablename__)
-            key = instance.__primary__
-            self.where(**{key: instance.__getattribute__(key)})
-            self.where()
+    def delete(self, record: Record = None) -> 'Delete':
+        self._commands['delete'] = 'DELETE'
+        if isinstance(record, Schema):
+            self.fr0m(record.__tablename__)
+            self.where(**{record.__primary__: record.__getattribute__(record.__primary__)})
             return self
-        self._query = 'DELETE '
+        elif isinstance(record, dict):
+            self.where(**record)
         return self
     

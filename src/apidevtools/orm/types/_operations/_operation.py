@@ -1,67 +1,65 @@
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 
 from ..types import RecordType, Record
 
 
 class Operation:
-    _query: str
-    _qargs: list
-    _type: type
+    _mapping: dict[str, int] = {
+        'insert': 1, 'select': 1, 'update': 1, 'delete': 1,
+        'from': 2, 'into': 2,
+        'columns': 3,
+        'values': 4, 'set': 4,
+        'where': 5,
+        'order': 6,
+        'limit': 7,
+        'offset': 8,
+        'returning': 9,
+    }
+    _commands: dict[str, str] = {}
+    _args: list = []
+    _type: type = dict
 
     def fr0m(self, table: str) -> 'Operation':
         c = self._constraint_wrapper  # noqa
-        self._query += f"FROM {c}{table}{c} "
+
+        self._commands['from'] = f"FROM {c}{table}{c}"
         return self
 
     def where(self, **conditions: Any) -> 'Operation':
-        self._qargs += conditions.values()
+        self._args += conditions.values()
         p, c = self._placeholder, self._constraint_wrapper  # noqa
         conditions = ' AND '.join([f'{c}{key}{c} = {p}' for key, value in conditions.items()])
-        self._query += f"WHERE {conditions} "
+        self._commands['where'] = f"WHERE {conditions}"
         return self
 
     def order(self, **columns: str) -> 'Operation':
         columns = ', '.join([f'{key} {value.upper()}' for key, value in columns.items()])
-        self._query += f"ORDER BY {columns} "
+        self._commands['order'] = f"ORDER BY {columns}"
         return self
 
     def limit(self, value: int) -> 'Operation':
-        self._query += f"LIMIT {value} "
+        self._commands['limit'] = f"LIMIT {value}"
         return self
 
     def offset(self, value: int) -> 'Operation':
-        self._query += f"OFFSET {value} "
+        self._commands['offset'] = f"OFFSET {value}"
         return self
 
     def returning(self, *columns, type: RecordType = dict) -> 'Operation':
         if type:
             self._type = type
         if columns:
-            self._query += f"RETURNING {', '.join(columns)} "
+            self._commands['returning'] = f"RETURNING {', '.join(columns)}"
         return self
 
     async def all(self, type: RecordType = dict) -> list[Record]:
-        # if not (query := self._query.lower()).startswith('select'):
-        #     if 'returning' not in query:
-        #         self.returning('*')
-        return await self.fetchall(f'{self._query[:-1]};', tuple(self._qargs), type)  # noqa
+        return await self.fetchall(self, self._args, type)  # noqa
 
     async def one(self, type: RecordType = dict) -> Optional[Record]:
-        # if not (query := self._query.lower()).startswith('select'):
-        #     if 'returning' not in query:
-        #         self.returning('*')
-        return await self.fetchone(f'{self._query[:-1]};', tuple(self._qargs), type)  # noqa
+        return await self.fetchone(self, self._args, type)  # noqa
 
     async def exec(self) -> bool:
-        return await self.execute(f'{self._query[:-1]};', tuple(self._qargs))  # noqa
-
-    def _refresh(self):
-        self._qargs = []
-        self._type = dict
-        try:
-            self._placeholder_count = 0
-        except AttributeError:
-            ...
+        return await self.execute(self, self._args)  # noqa
 
 
-Query: type = type[str | Operation]
+Query: type = type[str, Operation]

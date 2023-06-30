@@ -1,5 +1,7 @@
+from contextlib import suppress
 from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
 from abc import abstractmethod
+from copy import copy
 
 from .types import RecordType, Record
 from ._operations import Operation
@@ -24,26 +26,6 @@ class Connector:
     #     ...
 
     @abstractmethod
-    def __aiter__(self):
-        return self.records(f'{self._query[:-1]};', self._qargs, self._type)  # noqa
-
-    @abstractmethod
-    def __anext__(self) -> Record:
-        try:
-            return anext(self)
-        except StopIteration:
-            raise StopAsyncIteration
-
-    @abstractmethod
-    def _unwrapper(self, type: RecordType) -> Callable[[Any, RecordType], Awaitable[Record]]:
-        ...
-
-    async def _parameters(self, query: Query, args: tuple[Any, ...], type: RecordType):
-        if isinstance(query, Operation):
-            query, args, type = f'{self._query[:-1]};', self._qargs, self._type  # noqa
-        return query, args, type, self._unwrapper(type)
-
-    @abstractmethod
     async def execute(self, query: Query, args: tuple[Any, ...] = ()) -> bool:
         ...
 
@@ -61,3 +43,33 @@ class Connector:
     @abstractmethod
     async def records(self, query: Query, args: tuple[Any, ...] = (), type: RecordType = dict) -> AsyncGenerator[Record, None]:
         ...
+
+    @abstractmethod
+    def __aiter__(self):
+        return self.records(f'{self._query[:-1]};', self._qargs, self._type)  # noqa
+
+    @abstractmethod
+    def __anext__(self) -> Record:
+        try:
+            return anext(self)
+        except StopIteration:
+            raise StopAsyncIteration
+
+    @abstractmethod
+    def _unwrapper(self, type: RecordType) -> Callable[[Any, RecordType], Awaitable[Record]]:
+        ...
+
+    async def _parameters(self, query: Query, args: tuple[Any, ...], type: RecordType) \
+            -> tuple[str, list[Any, ...], type, Callable[[Any, RecordType], Awaitable[Record]]]:
+        if isinstance(query, Operation):
+            commands = {self._mapping[key]: self._commands[key] for key, value in self._commands.items()}  # noqa
+            query = f"{' '.join([commands[key] for key in sorted(commands.keys())])};"  # noqa
+            args = copy(self._args)  # noqa
+
+        self._commands.clear()  # noqa
+        self._args.clear()  # noqa
+        self._type = dict
+        with suppress(AttributeError):
+            self._placeholder_count = 0
+
+        return query, args, type, self._unwrapper(type)
