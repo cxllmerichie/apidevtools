@@ -2,21 +2,21 @@ import aioredis as _aioredis
 from typing import Any
 
 from ..utils import evaluate as _evaluate
-from ..logman import LoggerManager, Logger
+from .. import logman
 
 
 class Redis:
     def __init__(self, database: int = 0,
                  host: str = 'localhost', port: int | str = 6379,
                  user: str | None = None, password: str | None = None,
-                 logger: Logger = LoggerManager.logger()):
+                 logger: logman.Logger = logman.logger):
         self.database: int = database
         self.host: str = host
         self.port: str | int = port
         self.user: str | None = user
         self.password: str | None = password
 
-        self.logger: Logger = logger
+        self.logger: logman.Logger = logger
         self.pool: _aioredis.Redis | None = None
 
     async def create_pool(self) -> bool:
