@@ -7,7 +7,6 @@ import numpy as _np
 def convert(image: bytes | io.BytesIO | PIL.Image.Image) -> PIL.Image.Image:
     """
     Create PIL.Image.Image from bytes or io.BytesIO.
-    Also accepts PIL.Image.Image to simplify usage in and Image classes.
     :param image:
     :return:
     """
@@ -45,7 +44,7 @@ class Image:
 
 
 def generate(
-        text: str = Image.text, size: int = 512, fonttf=None,
+        text: str = Image.text, size: int = 512, ttf=None,
         bg_color: tuple[int, int, int] = (0, 0, 0), font_color: tuple[int, int, int] = (255, 255, 255)
 ) -> Image:
     """
@@ -53,17 +52,17 @@ def generate(
     By default has "N/A" white text on the black background.
     :param text:
     :param size:
-    :param fonttf:
+    :param ttf:
     :param bg_color:
     :param font_color:
     :return:
     """
-    if not fonttf:
+    if not ttf:
         from os import path
 
-        fonttf = path.join(path.dirname(__file__), 'ARIALNB.TTF')
+        ttf = path.join(path.dirname(__file__), 'ARIALNB.TTF')
 
-    font = _ImageFont.truetype(font=fonttf, size=int(size * 0.6))
+    font = _ImageFont.truetype(font=ttf, size=int(size * 0.6))
     img = PIL.Image.new(mode='RGB', size=(size, size), color=bg_color)
     draw = _ImageDraw.Draw(img)
     _, _, width, height = draw.textbbox((0, 0), text, font=font)

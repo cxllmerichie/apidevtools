@@ -1,5 +1,4 @@
 from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
-from functools import cache
 import aiosqlite
 
 from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Query, Schema

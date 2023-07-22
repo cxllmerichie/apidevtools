@@ -1,4 +1,4 @@
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 
 from ..types import RecordType, Record
 
@@ -17,7 +17,7 @@ class Operation:
     }
     _commands: dict[str, str] = {}
     _args: list = []
-    _type: type = Dict[str, Any]
+    _type: type = dict
 
     def fr0m(self, table: str) -> 'Operation':
         c = self._constraint_wrapper  # noqa
@@ -49,19 +49,19 @@ class Operation:
         self._commands['offset'] = f"OFFSET {p}"
         return self
 
-    def returning(self, *columns: str, type: RecordType = Dict[str, Any], auto: bool = False) -> 'Operation':
+    def returning(self, *columns: str, type: RecordType = dict, auto: bool = False) -> 'Operation':
         self._type = type
         if columns:
             self._commands['returning'] = f"RETURNING {', '.join(columns)}"
         if auto and not self._commands.get('returning'):
-            if any([stmt in self._commands.keys() for stmt in ['insert', 'update', 'delete']]):
+            if any(stmt in self._commands.keys() for stmt in ['insert', 'update', 'delete']):
                 self.returning('*')
         return self
 
-    async def all(self, type: RecordType = Dict[str, Any]) -> list[Record]:
+    async def all(self, type: RecordType = dict) -> list[Record]:
         return await self.fetchall(self.returning(auto=True), self._args, type)  # noqa
 
-    async def one(self, type: RecordType = Dict[str, Any]) -> Optional[Record]:
+    async def one(self, type: RecordType = dict) -> Optional[Record]:
         return await self.fetchone(self.returning(auto=True), self._args, type)  # noqa
 
     async def exec(self) -> bool:

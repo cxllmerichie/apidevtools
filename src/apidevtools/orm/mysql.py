@@ -1,5 +1,4 @@
 from typing import Any, Optional, AsyncGenerator, Callable, Awaitable, Dict
-from functools import cache
 import aiomysql
 
 from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Query, Schema, Operation
@@ -15,7 +14,7 @@ class MySQL(Connector, Insert, Select, Update, Delete):
                  logger: logman.Logger = logman.logger):
         self.database: str = database
         self.host: str = host
-        self.port: str | int = port
+        self.port: int = int(port)
         self.user: str = user
         self.password: str | None = password
 

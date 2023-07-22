@@ -21,5 +21,5 @@ class Schema(BaseModel, ABC):
         return self
 
 
-Record = Dict[str, Any] | Schema
-RecordType = type[Record]
+Record: type = Dict[str, Any] | Schema
+RecordType: type = type[Record]

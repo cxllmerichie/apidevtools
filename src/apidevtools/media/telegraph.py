@@ -7,7 +7,7 @@ import ujson as _json
 
 async def upload(file: io.BytesIO, mime: str = 'image/png') -> str | None:
     """
-    Upload media to telegra.ph
+    Upload media to telegra.ph.
     :param file:
     :param mime:
     :return:
@@ -26,7 +26,7 @@ async def upload(file: io.BytesIO, mime: str = 'image/png') -> str | None:
 
 async def download(url: str) -> bytes | None:
     """
-    Download media from any source
+    Download media.
     :param url:
     :return:
     """

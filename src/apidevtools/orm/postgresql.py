@@ -1,8 +1,7 @@
 from typing import Any, Optional, AsyncGenerator, Callable, Awaitable
-from functools import cache
 import asyncpg
 
-from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Schema, Query, Operation
+from .types import Connector, RecordType, Record, Insert, Select, Update, Delete, Schema, Query
 from .. import logman
 
 
@@ -102,3 +101,8 @@ class PostgreSQL(Connector, Insert, Select, Update, Delete):
     def _placeholder(self):
         self._placeholder_count += 1
         return f'${self._placeholder_count}'
+
+    async def _parameters(self, query: Query, args: tuple[Any, ...], type: RecordType) \
+            -> tuple[str, list[Any, ...], type, Callable[[Any, RecordType], Awaitable[Record]]]:
+        self._placeholder_count = 0
+        return await super()._parameters(query, args, type)
