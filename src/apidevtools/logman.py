@@ -11,12 +11,14 @@ logger.configure(handlers=[{'sink': _sys.stderr, 'format': format}])
 
 
 def add(filepath: str) -> Logger:
-    name = filepath
-    if filepath.endswith('.log'):
-        name = _os.path.basename(filepath).rstrip('.log')
-    else:
-        filepath = f'{filepath}.log'
+    name = _os.path.basename(filepath).rstrip('.log')
     logger.add(
-        filepath, enqueue=True, backtrace=True, diagnose=True, format=format, filter=lambda r: name in r['extra']
+        # level=level,  # TRACE & DEBUG are not supposed to be saved in log files
+        format=format,  # formatting
+        sink=filepath,  # save to file
+        enqueue=True,  # async
+        backtrace=True,  # affects logger.exception only
+        diagnose=True,  # detailed formatting?
+        catch=True,  # log errors caught when logging other errors
     )
     return logger.bind(**{name: True})
